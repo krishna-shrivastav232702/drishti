@@ -1,0 +1,72 @@
+[
+  {
+    "title": "June 2023",
+    "cardTitle": "Renewable Energy White Paper",
+    "cardSubtitle": "International Energy Agency",
+    "cardDetailedText": "Strategic framework for transitioning to renewable energy sources by 2035 with comprehensive investment roadmaps and policy recommendations.",
+    "date": "2023-06-14"
+  },
+  {
+    "title": "July 2023",
+    "cardTitle": "Healthcare Efficiency Study Published",
+    "cardSubtitle": "Johns Hopkins Medical Center",
+    "cardDetailedText": "Groundbreaking analysis of patient outcomes and cost reduction strategies across 50 healthcare facilities, demonstrating 25% efficiency improvements.",
+    "date": "2023-07-28"
+  },
+  {
+    "title": "August 2023",
+    "cardTitle": "Climate Change Assessment Released",
+    "cardSubtitle": "Global Climate Institute",
+    "cardDetailedText": "Comprehensive analysis of climate change effects on global ecosystems with predictive models showing critical intervention points for the next decade.",
+    "date": "2023-08-15"
+  },
+  {
+    "title": "August 2023",
+    "cardTitle": "Urban Planning Digital Age Paper",
+    "cardSubtitle": "Urban Development Institute",
+    "cardDetailedText": "Integration of smart city technologies and sustainable design principles for future urban environments, featuring case studies from 15 major cities.",
+    "date": "2023-08-03"
+  },
+  {
+    "title": "September 2023",
+    "cardTitle": "Neural Network Innovations Report",
+    "cardSubtitle": "MIT AI Lab",
+    "cardDetailedText": "Novel approaches to deep learning architectures that improve computational efficiency by 40% while maintaining 99% accuracy on benchmark datasets.",
+    "date": "2023-09-22"
+  },
+  {
+    "title": "September 2023",
+    "cardTitle": "Cybersecurity Threat Landscape",
+    "cardSubtitle": "CERT Coordination Center",
+    "cardDetailedText": "Comprehensive overview of emerging cyber threats and defensive strategies for critical infrastructure, including AI-powered attack vectors.",
+    "date": "2023-09-30"
+  },
+  {
+    "title": "October 2023",
+    "cardTitle": "Economic Policy Review Q3",
+    "cardSubtitle": "US Federal Reserve",
+    "cardDetailedText": "Quarterly analysis of monetary policy impacts on inflation and employment rates across major sectors, with forward guidance through 2024.",
+    "date": "2023-10-05"
+  },
+  {
+    "title": "October 2023",
+    "cardTitle": "Biotechnology Ethics Framework",
+    "cardSubtitle": "Global Bioethics Council",
+    "cardDetailedText": "Examination of ethical frameworks for emerging biotechnologies including CRISPR and synthetic biology, with international regulatory recommendations.",
+    "date": "2023-10-18"
+  },
+  {
+    "title": "November 2023",
+    "cardTitle": "Quantum Computing Breakthrough",
+    "cardSubtitle": "Tokyo Quantum Research Center",
+    "cardDetailedText": "Demonstration of quantum supremacy in optimization problems with practical applications in cryptography and drug discovery, processing 1000x faster than classical computers.",
+    "date": "2023-11-12"
+  },
+  {
+    "title": "November 2023",
+    "cardTitle": "Space Exploration Roadmap",
+    "cardSubtitle": "NASA JPL",
+    "cardDetailedText": "Detailed technical specifications for next-generation spacecraft and Mars colonization initiatives, including sustainable life support systems and resource utilization.",
+    "date": "2023-11-25"
+  }
+]
