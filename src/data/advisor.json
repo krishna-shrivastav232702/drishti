@@ -1,0 +1,131 @@
+{
+  "extraction_id": "CASE_2024_03_001",
+  "extraction_date": "2024-03-21T10:30:00Z",
+  "extraction_tool": "UFDR Advanced v9.2 / XRY 9.8 / Oxygen Detective 18.2",
+  "overall_status": "Incomplete",
+  "completeness_score": 73,
+  "integrity_check": {
+    "passed": false,
+    "issues_found": 8,
+    "critical_issues": 3
+  },
+  "missing_artifacts": [
+    {
+      "category": "Call Logs",
+      "app": "WhatsApp",
+      "severity": "Critical",
+      "description": "WhatsApp call logs missing — re-extraction needed",
+      "expected_count": "Unknown",
+      "found_count": 0,
+      "recommendation": "Use XRY advanced extraction with root access"
+    },
+    {
+      "category": "Voice Messages",
+      "app": "Telegram",
+      "severity": "Critical",
+      "description": "23 voice messages referenced but not exported",
+      "expected_count": 23,
+      "found_count": 0,
+      "recommendation": "Re-run Oxygen extraction with media extraction enabled"
+    },
+    {
+      "category": "App Data",
+      "app": "Facebook Messenger",
+      "severity": "High",
+      "description": "Facebook Messenger folders empty — possible selective export",
+      "expected_count": "Unknown",
+      "found_count": 0,
+      "recommendation": "Verify app installation and check extraction logs"
+    },
+    {
+      "category": "Media Files",
+      "app": "WhatsApp",
+      "severity": "High",
+      "description": "47 media files referenced in messages but files not found",
+      "expected_count": 47,
+      "found_count": 0,
+      "recommendation": "Extract media folder separately or use physical extraction"
+    },
+    {
+      "category": "Location Data",
+      "app": "Google Maps",
+      "severity": "Medium",
+      "description": "Google Maps location history not extracted",
+      "expected_count": "Unknown",
+      "found_count": 0,
+      "recommendation": "Extract Google account data separately"
+    },
+    {
+      "category": "Deleted Messages",
+      "app": "WhatsApp",
+      "severity": "Medium",
+      "description": "SQLite database shows 15 deleted messages that may be recoverable",
+      "expected_count": 15,
+      "found_count": 0,
+      "recommendation": "Use forensic SQLite recovery tools"
+    },
+    {
+      "category": "App Installation",
+      "app": "Signal",
+      "severity": "Low",
+      "description": "Signal app detected but no messages extracted",
+      "expected_count": "Unknown",
+      "found_count": 0,
+      "recommendation": "Signal uses end-to-end encryption; may require device unlock"
+    },
+    {
+      "category": "Contact List",
+      "app": "Phone",
+      "severity": "Low",
+      "description": "Partial contact list — only 124 of estimated 200+ contacts",
+      "expected_count": "200+",
+      "found_count": 124,
+      "recommendation": "Verify SIM card extraction and cloud backup access"
+    }
+  ],
+  "extracted_summary": {
+    "total_messages": 508,
+    "total_calls": 97,
+    "total_contacts": 124,
+    "total_media": 89,
+    "total_apps": 12,
+    "date_range": {
+      "start": "2024-01-15T00:00:00Z",
+      "end": "2024-03-20T23:59:59Z"
+    },
+    "devices_analyzed": 5
+  },
+  "suspicious_patterns_detected": [
+    {
+      "type": "Sudden Communication Silence",
+      "description": "No messages between Rahul Kumar and Amit Singh for 48 hours (March 10-12), followed by burst activity",
+      "severity": "High",
+      "timestamp": "2024-03-10T00:00:00Z to 2024-03-12T00:00:00Z"
+    },
+    {
+      "type": "Late Night Activity Spike",
+      "description": "Unusual message activity between 22:00-02:00 on March 12, 15, 19",
+      "severity": "Medium",
+      "participants": ["Rahul Kumar", "Amit Singh", "Priya Sharma"]
+    },
+    {
+      "type": "Deleted Message Pattern",
+      "description": "Multiple messages deleted immediately after financial discussions",
+      "severity": "High",
+      "count": 15
+    },
+    {
+      "type": "Cross-App Communication",
+      "description": "Same conversation topics appearing across WhatsApp and Telegram",
+      "severity": "Medium",
+      "participants": ["Rahul Kumar", "Priya Sharma"]
+    }
+  ],
+  "recommendations": [
+    "Re-extract WhatsApp call logs using advanced forensic mode",
+    "Recover deleted messages from SQLite database",
+    "Extract media files separately from device storage",
+    "Analyze cross-app communication patterns",
+    "Review late-night activity timestamps for case timeline"
+  ]
+}

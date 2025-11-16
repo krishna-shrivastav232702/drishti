@@ -5,69 +5,106 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
-import { ArrowRight, Upload, Search, Network, Calendar, FileText, Sparkles, Shield, Zap } from "lucide-react"
+import { 
+  ArrowRight, 
+  Upload, 
+  Search, 
+  Network, 
+  Calendar, 
+  FileText, 
+  Shield, 
+  Eye,
+  Languages,
+  ScanEye,
+  Image,
+  GitGraph,
+  Clock,
+  FileCheck,
+  AlertTriangle
+} from "lucide-react"
 
 export default function Home() {
   const features = [
     {
-      icon: Upload,
-      title: "Ingest Documents",
-      description: "Upload and process research papers, reports, and documents with AI-powered extraction.",
+      icon: Shield,
+      title: "Integrity Validation",
+      description: "UFDR manifest verification checks for missing logs, incomplete exports, and selective extractions before analysis.",
       href: "/ingest",
+      color: "text-red-500"
+    },
+    {
+      icon: GitGraph,
+      title: "Cross-Source Fusion",
+      description: "Unified graph of Person ↔ Device ↔ App ↔ Messages/Calls/Media across UFDR, XRY, and Oxygen exports.",
+      href: "/network",
       color: "text-blue-500"
     },
     {
-      icon: Search,
-      title: "Natural Language Search",
-      description: "Find relevant evidence using conversational queries powered by semantic search.",
+      icon: Languages,
+      title: "Multilingual Search",
+      description: "Hinglish-aware semantic search with transliteration normalization for code-switched conversations.",
       href: "/search",
       color: "text-purple-500"
     },
     {
+      icon: AlertTriangle,
+      title: "Anomaly Detection",
+      description: "Automatic detection of suspicious patterns, burst activity, deleted artifacts, and communication gaps.",
+      href: "/search",
+      color: "text-orange-500"
+    },
+    {
+      icon: Image,
+      title: "Media Triage (OCR + Vision)",
+      description: "Extract text from images, detect objects, identify sensitive items—make all media searchable by content.",
+      href: "/search",
+      color: "text-pink-500"
+    },
+    {
       icon: Network,
-      title: "Knowledge Graph",
-      description: "Visualize connections between documents, authors, and topics in an interactive network.",
+      title: "Relationship Graphs",
+      description: "Visualize who talked to whom, how often, with explainability for coordinators, bridges, and outliers.",
       href: "/network",
       color: "text-green-500"
     },
     {
-      icon: Calendar,
-      title: "Timeline View",
-      description: "Explore research evolution chronologically with rich context and relationships.",
+      icon: Clock,
+      title: "Timeline Reconstruction",
+      description: "Minute-by-minute chronology of chats, calls, locations, and media with cross-app correlation.",
       href: "/timeline",
-      color: "text-orange-500"
+      color: "text-cyan-500"
     },
     {
-      icon: FileText,
-      title: "Export Reports",
-      description: "Generate citations and export findings in multiple formats for your research.",
+      icon: FileCheck,
+      title: "Court-Ready Reports",
+      description: "Evidence-cited reports with message IDs, timestamps, file paths, and device sources—no hallucinations.",
       href: "/reports",
-      color: "text-pink-500"
+      color: "text-indigo-500"
     },
     {
-      icon: Sparkles,
-      title: "AI Insights",
-      description: "Get intelligent recommendations and discover hidden patterns in your research.",
-      href: "/search",
-      color: "text-yellow-500"
+      icon: ScanEye,
+      title: "Chain-of-Custody Safe",
+      description: "Deterministic pipelines with artifact hashing, model versioning, and immutable audit trails.",
+      href: "/reports",
+      color: "text-teal-500"
     }
   ]
 
   const benefits = [
     {
       icon: Shield,
-      title: "Credible Sources",
-      description: "Every piece of evidence is traceable to verified, peer-reviewed sources."
+      title: "No Blind Spots",
+      description: "Pre-analysis integrity checks ensure complete extractions before investigation begins."
     },
     {
-      icon: Zap,
-      title: "Lightning Fast",
-      description: "Search millions of documents and get results in milliseconds."
+      icon: Eye,
+      title: "Hidden Intelligence",
+      description: "Detect deleted messages, implied files, and patterns that break normal behavior."
     },
     {
-      icon: Sparkles,
-      title: "AI-Powered",
-      description: "Advanced machine learning understands context and meaning, not just keywords."
+      icon: FileText,
+      title: "Legally Defensible",
+      description: "Every claim includes evidence IDs, timestamps, and source paths for court verification."
     }
   ]
 
@@ -84,29 +121,31 @@ export default function Home() {
             className="mx-auto max-w-4xl text-center"
           >
             <Badge className="mb-4" variant="secondary">
-              <Sparkles className="mr-1 h-3 w-3" />
-              AI-Powered Research Platform
+              <Shield className="mr-1 h-3 w-3" />
+              AI-Assisted Forensic Intelligence Platform
             </Badge>
             <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
-              Evidence You Can{" "}
+              From UFDR to Evidence,{" "}
               <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                Cite
+                Fast
               </span>
             </h1>
             <p className="mb-8 text-lg text-muted-foreground sm:text-xl">
-              Transform your research workflow with Drishti. Discover, analyze, and cite credible evidence 
-              using cutting-edge AI technology. Build knowledge graphs, explore timelines, and export citations.
+              Drishti analyzes UFDR, XRY, and Oxygen mobile extraction reports—validates integrity, 
+              uncovers hidden patterns, performs multilingual Hinglish search, and generates court-ready, 
+              evidence-backed investigation reports.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Button asChild size="lg" className="group">
-                <Link href="/search">
-                  Start Searching
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <Link href="/ingest">
+                  Upload UFDR Report (Demo)
+                  <Upload className="ml-2 h-4 w-4 transition-transform group-hover:translate-y-[-2px]" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link href="/ingest">
-                  Upload Documents
+                <Link href="/search">
+                  Open Sample Case
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </div>
@@ -114,7 +153,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Grid */}
+      {/* Core Capabilities - 9 Features */}
       <section className="py-20 md:py-28 bg-muted/30">
         <div className="container">
           <motion.div
@@ -125,10 +164,10 @@ export default function Home() {
             className="mx-auto max-w-2xl text-center mb-12"
           >
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
-              Powerful Features for Modern Research
+              9 Core Capabilities
             </h2>
             <p className="text-lg text-muted-foreground">
-              Everything you need to discover, analyze, and cite research evidence in one platform.
+              From integrity validation to court-ready reports—built for forensic correctness.
             </p>
           </motion.div>
 
@@ -140,7 +179,7 @@ export default function Home() {
                   key={feature.title}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  transition={{ duration: 0.5, delay: index * 0.05 }}
                   viewport={{ once: true }}
                 >
                   <Link href={feature.href}>
@@ -163,7 +202,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Benefits Section */}
+      {/* Why Drishti */}
       <section className="py-20 md:py-28">
         <div className="container">
           <motion.div
@@ -174,10 +213,10 @@ export default function Home() {
             className="mx-auto max-w-2xl text-center mb-12"
           >
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
-              Why Choose Drishti?
+              Why Drishti?
             </h2>
             <p className="text-lg text-muted-foreground">
-              Built for researchers, by researchers. Trusted by leading institutions worldwide.
+              Built for investigators, verified by forensic standards.
             </p>
           </motion.div>
 
@@ -216,24 +255,29 @@ export default function Home() {
             className="mx-auto max-w-3xl text-center"
           >
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
-              Ready to Transform Your Research?
+              Ready to Analyze Your Case?
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Join thousands of researchers already using Drishti to discover and cite credible evidence.
+              Upload UFDR/XRY/Oxygen reports, run integrity checks, search in Hinglish, 
+              visualize networks, and export court-ready evidence.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Button asChild size="lg" className="group">
-                <Link href="/search">
-                  Get Started Free
+                <Link href="/ingest">
+                  Start Analysis
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link href="/ingest">
-                  Upload Your First Document
+                <Link href="/search">
+                  Explore Demo Case
                 </Link>
               </Button>
             </div>
+            <p className="mt-6 text-sm text-muted-foreground">
+              <Shield className="inline h-4 w-4 mr-1" />
+              Demo Only — Mock Data, No Real Evidence
+            </p>
           </motion.div>
         </div>
       </section>

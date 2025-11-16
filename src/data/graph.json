@@ -1,0 +1,257 @@
+{
+  "nodes": [
+    {
+      "id": "person_1",
+      "label": "Rahul Kumar",
+      "type": "person",
+      "role": "Coordinator",
+      "risk_score": 8.5,
+      "devices": 1,
+      "apps": 3,
+      "message_count": 156,
+      "call_count": 34,
+      "flags": ["Bridge Person", "High Activity"]
+    },
+    {
+      "id": "person_2",
+      "label": "Amit Singh",
+      "type": "person",
+      "role": "Bridge",
+      "risk_score": 7.8,
+      "devices": 1,
+      "apps": 2,
+      "message_count": 142,
+      "call_count": 28,
+      "flags": ["Coordinator Pattern"]
+    },
+    {
+      "id": "person_3",
+      "label": "Priya Sharma",
+      "type": "person",
+      "role": "Active Participant",
+      "risk_score": 6.2,
+      "devices": 1,
+      "apps": 2,
+      "message_count": 89,
+      "call_count": 15,
+      "flags": ["Location Sharing"]
+    },
+    {
+      "id": "person_4",
+      "label": "Vikram Patel",
+      "type": "person",
+      "role": "Participant",
+      "risk_score": 5.5,
+      "devices": 1,
+      "apps": 1,
+      "message_count": 67,
+      "call_count": 12,
+      "flags": ["Planning Keywords"]
+    },
+    {
+      "id": "person_5",
+      "label": "Neha Verma",
+      "type": "person",
+      "role": "Document Handler",
+      "risk_score": 6.8,
+      "devices": 1,
+      "apps": 2,
+      "message_count": 54,
+      "call_count": 8,
+      "flags": ["Document Sharing"]
+    },
+    {
+      "id": "device_1",
+      "label": "iPhone 13",
+      "type": "device",
+      "imei": "359876543210987",
+      "owner": "Rahul Kumar"
+    },
+    {
+      "id": "device_2",
+      "label": "Samsung S21",
+      "type": "device",
+      "imei": "352094102847563",
+      "owner": "Amit Singh"
+    },
+    {
+      "id": "device_3",
+      "label": "OnePlus 9",
+      "type": "device",
+      "imei": "861234567890123",
+      "owner": "Priya Sharma"
+    },
+    {
+      "id": "app_whatsapp",
+      "label": "WhatsApp",
+      "type": "app",
+      "message_count": 342
+    },
+    {
+      "id": "app_telegram",
+      "label": "Telegram",
+      "type": "app",
+      "message_count": 166
+    }
+  ],
+  "edges": [
+    {
+      "source": "person_1",
+      "target": "person_2",
+      "type": "MESSAGED",
+      "count": 48,
+      "app": "WhatsApp",
+      "last_contact": "2024-03-20T19:30:00Z",
+      "tags": ["Financial", "Planning"]
+    },
+    {
+      "source": "person_1",
+      "target": "person_2",
+      "type": "CALLED",
+      "count": 12,
+      "app": "WhatsApp",
+      "last_contact": "2024-03-12T22:30:00Z",
+      "tags": ["Voice"]
+    },
+    {
+      "source": "person_1",
+      "target": "person_3",
+      "type": "MESSAGED",
+      "count": 34,
+      "app": "Telegram",
+      "last_contact": "2024-03-13T09:47:00Z",
+      "tags": ["Planning", "Location"]
+    },
+    {
+      "source": "person_2",
+      "target": "person_3",
+      "type": "MESSAGED",
+      "count": 28,
+      "app": "WhatsApp",
+      "last_contact": "2024-03-20T19:35:00Z",
+      "tags": ["Financial"]
+    },
+    {
+      "source": "person_2",
+      "target": "person_4",
+      "type": "MESSAGED",
+      "count": 22,
+      "app": "WhatsApp",
+      "last_contact": "2024-03-14T16:35:00Z",
+      "tags": ["Planning"]
+    },
+    {
+      "source": "person_1",
+      "target": "person_5",
+      "type": "MESSAGED",
+      "count": 18,
+      "app": "WhatsApp",
+      "last_contact": "2024-03-15T14:22:00Z",
+      "tags": ["Documents"]
+    },
+    {
+      "source": "person_1",
+      "target": "person_4",
+      "type": "MESSAGED",
+      "count": 15,
+      "app": "WhatsApp",
+      "last_contact": "2024-03-19T08:15:00Z",
+      "tags": ["Planning"]
+    },
+    {
+      "source": "person_3",
+      "target": "person_5",
+      "type": "MESSAGED",
+      "count": 12,
+      "app": "WhatsApp",
+      "last_contact": "2024-03-17T15:45:00Z",
+      "tags": ["Evidence"]
+    },
+    {
+      "source": "person_2",
+      "target": "person_5",
+      "type": "MESSAGED",
+      "count": 10,
+      "app": "Telegram",
+      "last_contact": "2024-03-18T10:00:00Z",
+      "tags": ["Documents"]
+    },
+    {
+      "source": "person_1",
+      "target": "device_1",
+      "type": "OWNS",
+      "extraction_method": "UFDR"
+    },
+    {
+      "source": "person_2",
+      "target": "device_2",
+      "type": "OWNS",
+      "extraction_method": "XRY"
+    },
+    {
+      "source": "person_3",
+      "target": "device_3",
+      "type": "OWNS",
+      "extraction_method": "Oxygen"
+    },
+    {
+      "source": "device_1",
+      "target": "app_whatsapp",
+      "type": "INSTALLED"
+    },
+    {
+      "source": "device_1",
+      "target": "app_telegram",
+      "type": "INSTALLED"
+    },
+    {
+      "source": "device_2",
+      "target": "app_whatsapp",
+      "type": "INSTALLED"
+    },
+    {
+      "source": "device_2",
+      "target": "app_telegram",
+      "type": "INSTALLED"
+    },
+    {
+      "source": "device_3",
+      "target": "app_telegram",
+      "type": "INSTALLED"
+    },
+    {
+      "source": "device_3",
+      "target": "app_whatsapp",
+      "type": "INSTALLED"
+    }
+  ],
+  "explanation": {
+    "person_1": {
+      "role": "Coordinator",
+      "reason": "Appears as bridge connecting 3 distinct groups. High message frequency (156 messages) across multiple apps (WhatsApp, Telegram, Signal). Active during suspicious time windows (late night activity). Uses multiple devices.",
+      "evidence": [
+        "Connected to all other participants",
+        "Peak activity during 22:00-02:00 timeframe",
+        "Cross-app communication pattern detected"
+      ]
+    },
+    "person_2": {
+      "role": "Bridge",
+      "reason": "Secondary coordinator connecting Person 1 to Persons 3, 4, and 5. Exhibits coordinator pattern with burst messaging. Late night activity detected.",
+      "evidence": [
+        "Message burst detected on March 14 (16:30-16:35)",
+        "References to 'upar waala' (hierarchy)",
+        "Multiple financial keywords detected"
+      ]
+    },
+    "person_3": {
+      "role": "Active Participant",
+      "reason": "Active in location sharing and planning conversations. Shows burst activity pattern. Connected to both coordinators.",
+      "evidence": [
+        "Shared location coordinates on March 15",
+        "Message burst on March 13 (09:45-09:47)",
+        "Photo evidence shared with license plate visibility"
+      ]
+    }
+  }
+}

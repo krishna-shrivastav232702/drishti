@@ -1,0 +1,78 @@
+[
+  {
+    "call_id": "C1001",
+    "type": "Voice",
+    "app": "WhatsApp",
+    "caller": "Rahul Kumar",
+    "receiver": "Amit Singh",
+    "direction": "Outgoing",
+    "duration": 324,
+    "timestamp": "2024-03-12T22:30:00Z",
+    "status": "Connected",
+    "device": "iPhone_13_IMEI_359876543210987",
+    "tags": ["Late Night", "Long Duration"]
+  },
+  {
+    "call_id": "C1002",
+    "type": "Voice",
+    "app": "Phone",
+    "caller": "Amit Singh",
+    "receiver": "Priya Sharma",
+    "direction": "Outgoing",
+    "duration": 156,
+    "timestamp": "2024-03-13T09:30:00Z",
+    "status": "Connected",
+    "device": "Samsung_SM-G998B_IMEI_352094102847563"
+  },
+  {
+    "call_id": "C1003",
+    "type": "Video",
+    "app": "Telegram",
+    "caller": "Priya Sharma",
+    "receiver": "Rahul Kumar",
+    "direction": "Incoming",
+    "duration": 452,
+    "timestamp": "2024-03-14T18:45:00Z",
+    "status": "Connected",
+    "device": "OnePlus_9Pro_IMEI_861234567890123",
+    "tags": ["Video Call", "Long Duration"]
+  },
+  {
+    "call_id": "C1004",
+    "type": "Voice",
+    "app": "WhatsApp",
+    "caller": "Vikram Patel",
+    "receiver": "Amit Singh",
+    "direction": "Outgoing",
+    "duration": 89,
+    "timestamp": "2024-03-16T20:20:00Z",
+    "status": "Connected",
+    "device": "Xiaomi_Mi11_IMEI_123456789012345",
+    "tags": ["Late Night", "Short Duration"]
+  },
+  {
+    "call_id": "C1005",
+    "type": "Voice",
+    "app": "Phone",
+    "caller": "Rahul Kumar",
+    "receiver": "Neha Verma",
+    "direction": "Outgoing",
+    "duration": 267,
+    "timestamp": "2024-03-17T11:15:00Z",
+    "status": "Connected",
+    "device": "iPhone_13_IMEI_359876543210987"
+  },
+  {
+    "call_id": "MISSING_C1006",
+    "type": "Voice",
+    "app": "WhatsApp",
+    "caller": "Unknown",
+    "receiver": "Amit Singh",
+    "direction": "Incoming",
+    "duration": 0,
+    "timestamp": "2024-03-18T23:45:00Z",
+    "status": "Missing Log",
+    "device": "Samsung_SM-G998B_IMEI_352094102847563",
+    "tags": ["Missing Data", "Late Night"]
+  }
+]

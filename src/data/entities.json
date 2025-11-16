@@ -1,0 +1,115 @@
+[
+  {
+    "id": "person_1",
+    "name": "Rahul Kumar",
+    "role": "Coordinator",
+    "phones": ["+91-9876543210", "+91-8765432109"],
+    "devices": [
+      {
+        "model": "iPhone 13",
+        "imei": "359876543210987",
+        "os": "iOS 17.2",
+        "extraction_method": "UFDR"
+      }
+    ],
+    "apps_used": ["WhatsApp", "Telegram", "Signal"],
+    "connection_count": 12,
+    "message_count": 156,
+    "call_count": 34,
+    "risk_score": 8.5,
+    "flags": ["High Activity", "Bridge Person", "Multi-Device"]
+  },
+  {
+    "id": "person_2",
+    "name": "Amit Singh",
+    "role": "Bridge",
+    "phones": ["+91-9123456789"],
+    "devices": [
+      {
+        "model": "Samsung Galaxy S21 Ultra",
+        "imei": "352094102847563",
+        "os": "Android 14",
+        "extraction_method": "XRY"
+      }
+    ],
+    "apps_used": ["WhatsApp", "Telegram"],
+    "connection_count": 8,
+    "message_count": 142,
+    "call_count": 28,
+    "risk_score": 7.8,
+    "flags": ["Coordinator Pattern", "Late Night Activity"]
+  },
+  {
+    "id": "person_3",
+    "name": "Priya Sharma",
+    "role": "Active Participant",
+    "phones": ["+91-9988776655"],
+    "devices": [
+      {
+        "model": "OnePlus 9 Pro",
+        "imei": "861234567890123",
+        "os": "Android 13",
+        "extraction_method": "Oxygen"
+      }
+    ],
+    "apps_used": ["Telegram", "WhatsApp"],
+    "connection_count": 6,
+    "message_count": 89,
+    "call_count": 15,
+    "risk_score": 6.2,
+    "flags": ["Location Sharing", "Burst Activity"]
+  },
+  {
+    "id": "person_4",
+    "name": "Vikram Patel",
+    "role": "Participant",
+    "phones": ["+91-9111222333"],
+    "devices": [
+      {
+        "model": "Xiaomi Mi 11",
+        "imei": "123456789012345",
+        "os": "Android 12",
+        "extraction_method": "UFDR"
+      }
+    ],
+    "apps_used": ["WhatsApp"],
+    "connection_count": 4,
+    "message_count": 67,
+    "call_count": 12,
+    "risk_score": 5.5,
+    "flags": ["Planning Keywords"]
+  },
+  {
+    "id": "person_5",
+    "name": "Neha Verma",
+    "role": "Document Handler",
+    "phones": ["+91-9444555666"],
+    "devices": [
+      {
+        "model": "iPhone 12",
+        "imei": "987654321098765",
+        "os": "iOS 16.5",
+        "extraction_method": "UFDR"
+      }
+    ],
+    "apps_used": ["WhatsApp", "Telegram"],
+    "connection_count": 5,
+    "message_count": 54,
+    "call_count": 8,
+    "risk_score": 6.8,
+    "flags": ["Document Sharing", "Identity Documents"]
+  },
+  {
+    "id": "person_6",
+    "name": "Unknown Contact",
+    "role": "Peripheral",
+    "phones": ["+91-9000111222"],
+    "devices": [],
+    "apps_used": ["WhatsApp"],
+    "connection_count": 2,
+    "message_count": 12,
+    "call_count": 3,
+    "risk_score": 3.2,
+    "flags": ["Limited Data"]
+  }
+]
