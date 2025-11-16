@@ -1,284 +1,295 @@
 "use client"
 
-import Link from "next/link"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { motion } from "framer-motion"
 import { 
-  ArrowRight, 
-  Upload, 
+  Shield, 
   Search, 
   Network, 
-  Calendar, 
+  Clock, 
   FileText, 
-  Shield, 
-  Eye,
+  Upload,
+  AlertTriangle,
   Languages,
-  ScanEye,
-  Image,
-  GitGraph,
-  Clock,
-  FileCheck,
-  AlertTriangle
+  Eye,
+  CheckCircle2,
+  ArrowRight,
+  Sparkles
 } from "lucide-react"
+import { toast } from "sonner"
 
 export default function Home() {
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+
+  const handleLoadSampleCase = async () => {
+    setLoading(true)
+    toast.success("Loading sample UFDR case...")
+    
+    // Simulate loading delay
+    setTimeout(() => {
+      setLoading(false)
+      toast.success("Sample case loaded successfully!")
+      router.push("/ingest")
+    }, 1500)
+  }
+
   const features = [
     {
       icon: Shield,
-      title: "Integrity Validation",
-      description: "UFDR manifest verification checks for missing logs, incomplete exports, and selective extractions before analysis.",
-      href: "/ingest",
-      color: "text-red-500"
-    },
-    {
-      icon: GitGraph,
-      title: "Cross-Source Fusion",
-      description: "Unified graph of Person ↔ Device ↔ App ↔ Messages/Calls/Media across UFDR, XRY, and Oxygen exports.",
-      href: "/network",
+      title: "UFDR/XRY Validation",
+      description: "Validates extraction integrity BEFORE analysis. Detects missing logs, incomplete exports, and selective extractions.",
       color: "text-blue-500"
     },
     {
       icon: Languages,
       title: "Multilingual Search",
-      description: "Hinglish-aware semantic search with transliteration normalization for code-switched conversations.",
-      href: "/search",
+      description: "Understands Hinglish, code-switched text, and transliteration. Find 'paise bhejne' = 'send money' = 'transfer funds'.",
       color: "text-purple-500"
     },
     {
-      icon: AlertTriangle,
-      title: "Anomaly Detection",
-      description: "Automatic detection of suspicious patterns, burst activity, deleted artifacts, and communication gaps.",
-      href: "/search",
-      color: "text-orange-500"
-    },
-    {
-      icon: Image,
-      title: "Media Triage (OCR + Vision)",
-      description: "Extract text from images, detect objects, identify sensitive items—make all media searchable by content.",
-      href: "/search",
-      color: "text-pink-500"
-    },
-    {
       icon: Network,
-      title: "Relationship Graphs",
-      description: "Visualize who talked to whom, how often, with explainability for coordinators, bridges, and outliers.",
-      href: "/network",
-      color: "text-green-500"
+      title: "Communication Networks",
+      description: "Visualizes who-talked-to-whom with coordinator/bridge detection. Cross-app, multi-device relationship graphs.",
+      color: "text-teal-500"
     },
     {
       icon: Clock,
       title: "Timeline Reconstruction",
-      description: "Minute-by-minute chronology of chats, calls, locations, and media with cross-app correlation.",
-      href: "/timeline",
-      color: "text-cyan-500"
+      description: "Minute-by-minute chronology of chats, calls, media, and locations. Automatically builds the story of events.",
+      color: "text-orange-500"
     },
     {
-      icon: FileCheck,
+      icon: AlertTriangle,
+      title: "Anomaly Detection",
+      description: "AI flags suspicious patterns: deleted messages, odd-hour calls, message bursts, and hidden artifacts.",
+      color: "text-red-500"
+    },
+    {
+      icon: FileText,
       title: "Court-Ready Reports",
-      description: "Evidence-cited reports with message IDs, timestamps, file paths, and device sources—no hallucinations.",
-      href: "/reports",
-      color: "text-indigo-500"
-    },
-    {
-      icon: ScanEye,
-      title: "Chain-of-Custody Safe",
-      description: "Deterministic pipelines with artifact hashing, model versioning, and immutable audit trails.",
-      href: "/reports",
-      color: "text-teal-500"
+      description: "Every claim includes Message ID, Timestamp, Device Source. No hallucinations. Legally defensible citations.",
+      color: "text-green-500"
     }
   ]
 
   const benefits = [
     {
-      icon: Shield,
-      title: "No Blind Spots",
-      description: "Pre-analysis integrity checks ensure complete extractions before investigation begins."
+      title: "Incomplete Extraction Detection",
+      description: "Identifies missing WhatsApp call logs, Telegram voice notes, deleted media files BEFORE you start analysis."
     },
     {
-      icon: Eye,
+      title: "Cross-Source Fusion",
+      description: "Unifies evidence from multiple apps, devices, and formats into one coherent investigation graph."
+    },
+    {
       title: "Hidden Intelligence",
-      description: "Detect deleted messages, implied files, and patterns that break normal behavior."
+      description: "OCR extracts text from screenshots, IDs, passports. Makes images searchable by content."
     },
     {
-      icon: FileText,
-      title: "Legally Defensible",
-      description: "Every claim includes evidence IDs, timestamps, and source paths for court verification."
+      title: "Chain-of-Custody Safe",
+      description: "Deterministic pipelines, artifact hashing, model versioning, immutable audit trails."
     }
   ]
 
   return (
-    <div className="flex flex-col">
+    <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 md:py-32 lg:py-40">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
-        <div className="container relative z-10">
+      <section className="relative py-20 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-background" />
+        
+        <div className="container relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mx-auto max-w-4xl text-center"
+            className="max-w-4xl mx-auto text-center"
           >
             <Badge className="mb-4" variant="secondary">
-              <Shield className="mr-1 h-3 w-3" />
+              <Sparkles className="mr-2 h-3 w-3" />
               AI-Assisted Forensic Intelligence Platform
             </Badge>
-            <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
+            
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">
               From UFDR to Evidence,{" "}
-              <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                Fast
-              </span>
+              <span className="text-primary">Fast</span>
             </h1>
-            <p className="mb-8 text-lg text-muted-foreground sm:text-xl">
-              Drishti analyzes UFDR, XRY, and Oxygen mobile extraction reports—validates integrity, 
-              uncovers hidden patterns, performs multilingual Hinglish search, and generates court-ready, 
-              evidence-backed investigation reports.
+            
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Convert mobile extraction reports into evidence-backed, investigation-ready insights. 
+              Multilingual search, network graphs, and court-ready citations.
             </p>
-            <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <Button asChild size="lg" className="group">
-                <Link href="/ingest">
-                  Upload UFDR Report (Demo)
-                  <Upload className="ml-2 h-4 w-4 transition-transform group-hover:translate-y-[-2px]" />
-                </Link>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                size="lg" 
+                className="text-lg px-8"
+                onClick={() => router.push("/ingest")}
+              >
+                <Upload className="mr-2 h-5 w-5" />
+                Upload UFDR Report
               </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href="/search">
-                  Open Sample Case
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="text-lg px-8"
+                onClick={handleLoadSampleCase}
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Sparkles className="mr-2 h-5 w-5 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    <Eye className="mr-2 h-5 w-5" />
+                    Try Sample Case
+                  </>
+                )}
               </Button>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Core Capabilities - 9 Features */}
-      <section className="py-20 md:py-28 bg-muted/30">
+      {/* Features Grid */}
+      <section className="py-20 bg-muted/30">
         <div className="container">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
             viewport={{ once: true }}
-            className="mx-auto max-w-2xl text-center mb-12"
+            className="text-center mb-12"
           >
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
-              9 Core Capabilities
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Nine Core Capabilities
             </h2>
-            <p className="text-lg text-muted-foreground">
-              From integrity validation to court-ready reports—built for forensic correctness.
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Drishti solves the critical challenges in mobile forensic analysis
             </p>
           </motion.div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((feature, index) => {
-              const Icon = feature.icon
-              return (
-                <motion.div
-                  key={feature.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.05 }}
-                  viewport={{ once: true }}
-                >
-                  <Link href={feature.href}>
-                    <Card className="h-full transition-all hover:shadow-lg hover:border-primary/50 group cursor-pointer">
-                      <CardHeader>
-                        <div className={`mb-2 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 ${feature.color}`}>
-                          <Icon className="h-6 w-6" />
-                        </div>
-                        <CardTitle className="group-hover:text-primary transition-colors">
-                          {feature.title}
-                        </CardTitle>
-                        <CardDescription>{feature.description}</CardDescription>
-                      </CardHeader>
-                    </Card>
-                  </Link>
-                </motion.div>
-              )
-            })}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="h-full hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <feature.icon className={`h-10 w-10 mb-3 ${feature.color}`} />
+                    <CardTitle className="text-xl">{feature.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-sm leading-relaxed">
+                      {feature.description}
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Why Drishti */}
-      <section className="py-20 md:py-28">
+      {/* Benefits Section */}
+      <section className="py-20">
         <div className="container">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
             viewport={{ once: true }}
-            className="mx-auto max-w-2xl text-center mb-12"
+            className="text-center mb-12"
           >
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Why Drishti?
             </h2>
-            <p className="text-lg text-muted-foreground">
-              Built for investigators, verified by forensic standards.
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Traditional forensic tools assume reports are complete. Drishti knows better.
             </p>
           </motion.div>
 
-          <div className="grid gap-8 md:grid-cols-3">
-            {benefits.map((benefit, index) => {
-              const Icon = benefit.icon
-              return (
-                <motion.div
-                  key={benefit.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="text-center"
-                >
-                  <div className="mx-auto mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                    <Icon className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="mb-2 text-xl font-semibold">{benefit.title}</h3>
-                  <p className="text-muted-foreground">{benefit.description}</p>
-                </motion.div>
-              )
-            })}
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {benefits.map((benefit, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="h-full border-l-4 border-l-primary">
+                  <CardHeader>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
+                      <div>
+                        <CardTitle className="text-lg mb-2">{benefit.title}</CardTitle>
+                        <CardDescription className="text-sm leading-relaxed">
+                          {benefit.description}
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 md:py-28 bg-primary/5">
+      <section className="py-20 bg-primary/5">
         <div className="container">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
             viewport={{ once: true }}
-            className="mx-auto max-w-3xl text-center"
+            className="max-w-3xl mx-auto text-center"
           >
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
-              Ready to Analyze Your Case?
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              Ready to Transform Your Investigation?
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Upload UFDR/XRY/Oxygen reports, run integrity checks, search in Hinglish, 
-              visualize networks, and export court-ready evidence.
+              Start with a sample case or upload your own UFDR/XRY/Oxygen extraction report
             </p>
-            <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <Button asChild size="lg" className="group">
-                <Link href="/ingest">
-                  Start Analysis
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href="/search">
-                  Explore Demo Case
-                </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                size="lg" 
+                className="text-lg px-8"
+                onClick={handleLoadSampleCase}
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Sparkles className="mr-2 h-5 w-5 animate-spin" />
+                    Loading Sample...
+                  </>
+                ) : (
+                  <>
+                    Try Sample Case
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </>
+                )}
               </Button>
             </div>
-            <p className="mt-6 text-sm text-muted-foreground">
-              <Shield className="inline h-4 w-4 mr-1" />
-              Demo Only — Mock Data, No Real Evidence
-            </p>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Demo Notice */}
+      <section className="py-8 bg-muted">
+        <div className="container">
+          <p className="text-center text-sm text-muted-foreground">
+            <strong className="font-semibold">Demo Only</strong> — Mock Data, No Real Evidence. 
+            This is a frontend prototype demonstrating forensic intelligence capabilities.
+          </p>
         </div>
       </section>
     </div>

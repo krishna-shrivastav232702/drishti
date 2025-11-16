@@ -1,160 +1,182 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
-import CytoscapeComponent from "react-cytoscapejs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { ZoomIn, ZoomOut, Maximize2, RefreshCw, Network as NetworkIcon } from "lucide-react"
+import { Network as NetworkIcon, Users, Smartphone, MessageSquare, AlertTriangle, Phone } from "lucide-react"
 import { toast } from "sonner"
-import { simulateLoading } from "@/lib/utils"
-import networkData from "@/data/network.json"
+import graphData from "@/data/graph.json"
+import entitiesData from "@/data/entities.json"
 
-interface NodeData {
-  id: string
-  label: string
-  type: string
-  citations?: number
-}
+// @ts-ignore
+import cytoscape from "cytoscape"
 
 export default function NetworkPage() {
-  const [isLoading, setIsLoading] = useState(true)
-  const [selectedNode, setSelectedNode] = useState<NodeData | null>(null)
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const cyRef = useRef<any>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [selectedNode, setSelectedNode] = useState<any>(null)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   useEffect(() => {
-    loadNetworkData()
+    if (!containerRef.current || cyRef.current) return
+
+    const cy = cytoscape({
+      container: containerRef.current,
+      elements: [
+        // Nodes
+        ...graphData.nodes.map((node: any) => ({
+          data: { 
+            id: node.id, 
+            label: node.label,
+            type: node.type,
+            role: node.role,
+            risk_score: node.risk_score
+          }
+        })),
+        // Edges
+        ...graphData.edges.map((edge: any, index: number) => ({
+          data: { 
+            id: `edge-${index}`,
+            source: edge.source, 
+            target: edge.target,
+            label: edge.kind,
+            count: edge.count,
+            app: edge.app
+          }
+        }))
+      ],
+      style: [
+        {
+          selector: 'node[type="person"]',
+          style: {
+            'background-color': (ele: any) => {
+              const risk = ele.data('risk_score') || 0
+              if (risk > 0.85) return '#ef4444'
+              if (risk > 0.70) return '#f97316'
+              return '#3b82f6'
+            },
+            'label': 'data(label)',
+            'width': (ele: any) => {
+              const risk = ele.data('risk_score') || 0
+              return 40 + (risk * 30)
+            },
+            'height': (ele: any) => {
+              const risk = ele.data('risk_score') || 0
+              return 40 + (risk * 30)
+            },
+            'color': '#fff',
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'font-size': '12px',
+            'font-weight': 'bold',
+            'text-outline-width': 2,
+            'text-outline-color': '#000'
+          }
+        },
+        {
+          selector: 'node[type="device"]',
+          style: {
+            'background-color': '#8b5cf6',
+            'shape': 'rectangle',
+            'label': 'data(label)',
+            'width': 50,
+            'height': 30,
+            'color': '#fff',
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'font-size': '10px',
+            'text-outline-width': 2,
+            'text-outline-color': '#000'
+          }
+        },
+        {
+          selector: 'node[type="app"]',
+          style: {
+            'background-color': '#10b981',
+            'shape': 'diamond',
+            'label': 'data(label)',
+            'width': 40,
+            'height': 40,
+            'color': '#fff',
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'font-size': '10px',
+            'text-outline-width': 2,
+            'text-outline-color': '#000'
+          }
+        },
+        {
+          selector: 'edge',
+          style: {
+            'width': (ele: any) => Math.min(2 + (ele.data('count') || 0) / 10, 10),
+            'line-color': '#94a3b8',
+            'target-arrow-color': '#94a3b8',
+            'target-arrow-shape': 'triangle',
+            'curve-style': 'bezier',
+            'label': 'data(label)',
+            'font-size': '8px',
+            'color': '#64748b',
+            'text-background-color': '#fff',
+            'text-background-opacity': 0.8,
+            'text-background-padding': '2px'
+          }
+        }
+      ],
+      layout: {
+        name: 'cose',
+        animate: true,
+        animationDuration: 1000,
+        nodeRepulsion: 8000,
+        idealEdgeLength: 100,
+        edgeElasticity: 100,
+        nestingFactor: 1.2,
+        gravity: 1,
+        numIter: 1000,
+        initialTemp: 200,
+        coolingFactor: 0.95,
+        minTemp: 1.0
+      }
+    })
+
+    cy.on('tap', 'node', (evt: any) => {
+      const node = evt.target
+      const nodeData = node.data()
+      
+      // Find entity details
+      if (nodeData.type === 'person') {
+        const entity = entitiesData.find((e: any) => e.id === nodeData.id)
+        setSelectedNode({
+          ...nodeData,
+          details: entity
+        })
+        setIsDrawerOpen(true)
+      }
+    })
+
+    cyRef.current = cy
+
+    return () => {
+      if (cyRef.current) {
+        cyRef.current.destroy()
+        cyRef.current = null
+      }
+    }
   }, [])
 
-  const loadNetworkData = async () => {
-    setIsLoading(true)
-    await simulateLoading(null, 1000)
-    setIsLoading(false)
-    toast.success("Network graph loaded successfully")
-  }
-
-  const cytoscapeElements = [
-    ...networkData.nodes.map(node => ({
-      data: { 
-        id: node.id, 
-        label: node.label,
-        type: node.type,
-        citations: node.citations
-      }
-    })),
-    ...networkData.edges.map((edge, index) => ({
-      data: { 
-        id: `edge-${index}`,
-        source: edge.source, 
-        target: edge.target,
-        type: edge.type
-      }
-    }))
-  ]
-
-  const cytoscapeStylesheet = [
-    {
-      selector: 'node',
-      style: {
-        'background-color': '#6366f1',
-        'label': 'data(label)',
-        'color': '#fff',
-        'text-valign': 'center',
-        'text-halign': 'center',
-        'font-size': '10px',
-        'width': '40px',
-        'height': '40px'
-      }
-    },
-    {
-      selector: 'node[type="document"]',
-      style: {
-        'background-color': '#6366f1',
-        'shape': 'ellipse'
-      }
-    },
-    {
-      selector: 'node[type="author"]',
-      style: {
-        'background-color': '#8b5cf6',
-        'shape': 'rectangle'
-      }
-    },
-    {
-      selector: 'node[type="topic"]',
-      style: {
-        'background-color': '#14b8a6',
-        'shape': 'diamond'
-      }
-    },
-    {
-      selector: 'edge',
-      style: {
-        'width': 2,
-        'line-color': '#cbd5e1',
-        'target-arrow-color': '#cbd5e1',
-        'target-arrow-shape': 'triangle',
-        'curve-style': 'bezier'
-      }
-    },
-    {
-      selector: 'node:selected',
-      style: {
-        'border-width': 3,
-        'border-color': '#f59e0b'
-      }
-    }
-  ]
-
-  const handleNodeTap = (event: any) => {
-    const node = event.target
-    const nodeData: NodeData = {
-      id: node.data('id'),
-      label: node.data('label'),
-      type: node.data('type'),
-      citations: node.data('citations')
-    }
-    setSelectedNode(nodeData)
-    setIsDrawerOpen(true)
-  }
-
-  const handleZoomIn = () => {
+  const fitGraph = () => {
     if (cyRef.current) {
-      const cy = cyRef.current
-      cy.zoom(cy.zoom() * 1.2)
+      cyRef.current.fit(50)
+      toast.success("Graph view reset")
     }
   }
 
-  const handleZoomOut = () => {
-    if (cyRef.current) {
-      const cy = cyRef.current
-      cy.zoom(cy.zoom() * 0.8)
-    }
-  }
-
-  const handleResetView = () => {
-    if (cyRef.current) {
-      cyRef.current.fit()
-      toast.success("View reset to default")
-    }
-  }
-
-  const handleCenterView = () => {
-    if (cyRef.current) {
-      cyRef.current.center()
-    }
-  }
-
-  const getNodeTypeColor = (type: string) => {
-    switch (type) {
-      case 'document': return 'bg-blue-500'
-      case 'author': return 'bg-purple-500'
-      case 'topic': return 'bg-teal-500'
-      default: return 'bg-gray-500'
-    }
+  const getRiskColor = (score: number) => {
+    if (score > 0.85) return "text-red-500"
+    if (score > 0.70) return "text-orange-500"
+    return "text-blue-500"
   }
 
   return (
@@ -165,104 +187,63 @@ export default function NetworkPage() {
         className="mx-auto max-w-7xl"
       >
         <div className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight mb-2">Knowledge Graph</h1>
+          <h1 className="text-4xl font-bold tracking-tight mb-2">Communication Network</h1>
           <p className="text-lg text-muted-foreground">
-            Explore connections between documents, authors, and research topics
+            Person ↔ Device ↔ App relationship graph with coordinator/bridge detection
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-4">
-          <div className="lg:col-span-3">
-            <Card className="overflow-hidden">
-              <CardHeader className="border-b">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Network Visualization</CardTitle>
-                    <CardDescription>
-                      Click on nodes to view details • Drag to pan • Scroll to zoom
-                    </CardDescription>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button size="icon" variant="outline" onClick={handleZoomIn}>
-                      <ZoomIn className="h-4 w-4" />
-                    </Button>
-                    <Button size="icon" variant="outline" onClick={handleZoomOut}>
-                      <ZoomOut className="h-4 w-4" />
-                    </Button>
-                    <Button size="icon" variant="outline" onClick={handleCenterView}>
-                      <Maximize2 className="h-4 w-4" />
-                    </Button>
-                    <Button size="icon" variant="outline" onClick={handleResetView}>
-                      <RefreshCw className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                {isLoading ? (
-                  <div className="flex items-center justify-center h-[600px] bg-muted/20">
-                    <div className="text-center space-y-4">
-                      <NetworkIcon className="h-12 w-12 animate-pulse text-primary mx-auto" />
-                      <p className="text-muted-foreground">Loading network graph...</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="h-[600px] bg-muted/20">
-                    <CytoscapeComponent
-                      elements={cytoscapeElements}
-                      style={{ width: '100%', height: '100%' }}
-                      stylesheet={cytoscapeStylesheet}
-                      layout={{
-                        name: 'cose',
-                        animate: true,
-                        animationDuration: 1000,
-                        nodeRepulsion: 8000,
-                        idealEdgeLength: 100,
-                        edgeElasticity: 100,
-                        nestingFactor: 5,
-                        gravity: 80,
-                        numIter: 1000,
-                        initialTemp: 200,
-                        coolingFactor: 0.95,
-                        minTemp: 1.0
-                      }}
-                      cy={(cy) => {
-                        cyRef.current = cy
-                        cy.on('tap', 'node', handleNodeTap)
-                      }}
-                    />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+        <div className="grid lg:grid-cols-[1fr_350px] gap-6">
+          {/* Graph Visualization */}
+          <Card className="lg:col-span-1">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <NetworkIcon className="h-5 w-5" />
+                Network Graph
+              </CardTitle>
+              <CardDescription>
+                Click on nodes to view details • Edge thickness = communication frequency
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div 
+                ref={containerRef}
+                className="w-full h-[600px] bg-muted/30 rounded-lg border border-border"
+              />
+              <div className="mt-4 flex gap-2">
+                <Button size="sm" variant="outline" onClick={fitGraph}>
+                  Reset View
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
+          {/* Legend & Key Entities */}
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Legend</CardTitle>
-                <CardDescription>Node types in the graph</CardDescription>
+                <CardTitle className="text-lg">Legend</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-blue-500" />
+                  <div className="w-8 h-8 rounded-full bg-red-500" />
                   <div>
-                    <p className="text-sm font-medium">Documents</p>
-                    <p className="text-xs text-muted-foreground">Research papers</p>
+                    <p className="font-medium text-sm">High Risk</p>
+                    <p className="text-xs text-muted-foreground">Score &gt; 0.85</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded bg-purple-500" />
+                  <div className="w-8 h-8 rounded-full bg-orange-500" />
                   <div>
-                    <p className="text-sm font-medium">Authors</p>
-                    <p className="text-xs text-muted-foreground">Researchers</p>
+                    <p className="font-medium text-sm">Medium Risk</p>
+                    <p className="text-xs text-muted-foreground">Score 0.70-0.85</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rotate-45 bg-teal-500" />
+                  <div className="w-8 h-8 rounded-full bg-blue-500" />
                   <div>
-                    <p className="text-sm font-medium">Topics</p>
-                    <p className="text-xs text-muted-foreground">Research areas</p>
+                    <p className="font-medium text-sm">Low Risk</p>
+                    <p className="text-xs text-muted-foreground">Score &lt; 0.70</p>
                   </div>
                 </div>
               </CardContent>
@@ -270,31 +251,31 @@ export default function NetworkPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Network Stats</CardTitle>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-destructive" />
+                  Key Entities
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Documents</span>
-                  <Badge variant="secondary">
-                    {networkData.nodes.filter(n => n.type === 'document').length}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Authors</span>
-                  <Badge variant="secondary">
-                    {networkData.nodes.filter(n => n.type === 'author').length}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Topics</span>
-                  <Badge variant="secondary">
-                    {networkData.nodes.filter(n => n.type === 'topic').length}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Connections</span>
-                  <Badge variant="secondary">{networkData.edges.length}</Badge>
-                </div>
+                {entitiesData
+                  .filter((e: any) => e.type === "person" && e.risk_score > 0.7)
+                  .sort((a: any, b: any) => b.risk_score - a.risk_score)
+                  .map((entity: any) => (
+                    <div key={entity.id} className="p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="font-medium text-sm">{entity.name}</p>
+                        <Badge variant={entity.risk_score > 0.85 ? "destructive" : "default"}>
+                          {entity.role}
+                        </Badge>
+                      </div>
+                      <p className={`text-xs font-semibold ${getRiskColor(entity.risk_score)}`}>
+                        Risk: {(entity.risk_score * 100).toFixed(0)}%
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {entity.reason}
+                      </p>
+                    </div>
+                  ))}
               </CardContent>
             </Card>
           </div>
@@ -303,48 +284,79 @@ export default function NetworkPage() {
 
       {/* Node Details Drawer */}
       <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <SheetContent>
+        <SheetContent className="overflow-y-auto">
           <SheetHeader>
-            <SheetTitle className="flex items-center gap-2">
-              <div className={`h-8 w-8 rounded-full ${getNodeTypeColor(selectedNode?.type || '')}`} />
-              {selectedNode?.label}
-            </SheetTitle>
+            <SheetTitle>{selectedNode?.label}</SheetTitle>
             <SheetDescription>
-              {selectedNode?.type && (
-                <Badge variant="outline" className="mt-2">
-                  {selectedNode.type}
-                </Badge>
-              )}
+              {selectedNode?.type === "person" ? "Person Profile" : "Node Details"}
             </SheetDescription>
           </SheetHeader>
-          <div className="mt-6 space-y-4">
-            <div>
-              <p className="text-sm font-medium mb-1">Node ID</p>
-              <p className="text-sm text-muted-foreground font-mono">{selectedNode?.id}</p>
-            </div>
-            {selectedNode?.citations && (
+          
+          {selectedNode?.details && (
+            <div className="mt-6 space-y-6">
               <div>
-                <p className="text-sm font-medium mb-1">Citations</p>
-                <p className="text-2xl font-bold text-primary">{selectedNode.citations}</p>
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  Risk Assessment
+                </h3>
+                <div className="p-4 bg-muted rounded-lg space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Role</span>
+                    <Badge>{selectedNode.details.role}</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Risk Score</span>
+                    <span className={`font-bold ${getRiskColor(selectedNode.details.risk_score)}`}>
+                      {(selectedNode.details.risk_score * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-3">
+                  <strong>Why flagged:</strong> {selectedNode.details.reason}
+                </p>
               </div>
-            )}
-            <div>
-              <p className="text-sm font-medium mb-2">Connected Nodes</p>
-              <p className="text-sm text-muted-foreground">
-                This node is connected to {networkData.edges.filter(e => 
-                  e.source === selectedNode?.id || e.target === selectedNode?.id
-                ).length} other nodes in the graph.
-              </p>
+
+              <div>
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  Contact Information
+                </h3>
+                <div className="space-y-2">
+                  {selectedNode.details.phones.map((phone: string, idx: number) => (
+                    <div key={idx} className="p-2 bg-muted rounded text-sm font-mono">
+                      {phone}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {selectedNode.details.devices && selectedNode.details.devices.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Smartphone className="h-4 w-4" />
+                    Devices
+                  </h3>
+                  <div className="space-y-3">
+                    {selectedNode.details.devices.map((device: any, idx: number) => (
+                      <div key={idx} className="p-3 bg-muted rounded-lg">
+                        <p className="font-medium text-sm">{device.model}</p>
+                        <p className="text-xs text-muted-foreground font-mono mt-1">
+                          IMEI: {device.imei}
+                        </p>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {device.apps.map((app: string) => (
+                            <Badge key={app} variant="secondary" className="text-xs">
+                              {app}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="pt-4 space-y-2">
-              <Button className="w-full" variant="outline">
-                View Full Details
-              </Button>
-              <Button className="w-full" variant="outline">
-                Explore Connections
-              </Button>
-            </div>
-          </div>
+          )}
         </SheetContent>
       </Sheet>
     </div>

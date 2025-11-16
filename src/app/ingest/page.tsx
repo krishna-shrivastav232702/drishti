@@ -1,132 +1,84 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { 
   Upload, 
   FileText, 
   CheckCircle2, 
-  AlertCircle, 
-  AlertTriangle,
-  Loader2, 
-  Shield, 
-  MessageSquare, 
-  Phone, 
-  Users, 
-  Image as ImageIcon,
-  Smartphone,
+  AlertTriangle, 
+  XCircle,
+  Sparkles,
   ArrowRight,
-  XCircle
+  Shield,
+  MessageSquare,
+  Phone,
+  Image as ImageIcon,
+  Users
 } from "lucide-react"
 import { toast } from "sonner"
+import { simulateLoading } from "@/lib/utils"
 import advisorData from "@/data/advisor.json"
 
-interface UploadedFile {
-  name: string
-  size: number
-  status: "processing" | "completed" | "error"
-  progress: number
-}
-
 export default function IngestPage() {
-  const [files, setFiles] = useState<UploadedFile[]>([])
-  const [isDragging, setIsDragging] = useState(false)
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [showAdvisor, setShowAdvisor] = useState(false)
-  const [showSummary, setShowSummary] = useState(false)
+  const router = useRouter()
+  const [uploadedFile, setUploadedFile] = useState<string | null>(null)
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [showResults, setShowResults] = useState(false)
+  const [analysisProgress, setAnalysisProgress] = useState(0)
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }, [])
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-  }, [])
-
-  const processFile = async (file: File) => {
-    const newFile: UploadedFile = {
-      name: file.name,
-      size: file.size,
-      status: "processing",
-      progress: 0
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setUploadedFile(file.name)
+      toast.success(`File "${file.name}" uploaded successfully`)
     }
-
-    setFiles(prev => [...prev, newFile])
-
-    // Simulate file processing
-    for (let i = 0; i <= 100; i += 10) {
-      await new Promise(resolve => setTimeout(resolve, 150))
-      setFiles(prev => prev.map(f => 
-        f.name === file.name ? { ...f, progress: i } : f
-      ))
-    }
-
-    setFiles(prev => prev.map(f => 
-      f.name === file.name 
-        ? { ...f, status: "completed", progress: 100 } 
-        : f
-    ))
-
-    toast.success(`${file.name} uploaded successfully!`)
   }
 
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-    setIsProcessing(true)
-
-    const droppedFiles = Array.from(e.dataTransfer.files)
-    
-    for (const file of droppedFiles) {
-      await processFile(file)
+  const handleRunCheck = async () => {
+    if (!uploadedFile) {
+      toast.error("Please upload a UFDR/XRY report first")
+      return
     }
 
-    setIsProcessing(false)
-  }, [])
+    setIsAnalyzing(true)
+    setShowResults(false)
+    setAnalysisProgress(0)
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return
-    setIsProcessing(true)
+    // Simulate analysis progress
+    const interval = setInterval(() => {
+      setAnalysisProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval)
+          return 100
+        }
+        return prev + 10
+      })
+    }, 200)
 
-    const selectedFiles = Array.from(e.target.files)
+    await simulateLoading(null, 2500)
     
-    for (const file of selectedFiles) {
-      await processFile(file)
-    }
-
-    setIsProcessing(false)
-  }
-
-  const runCompletenessCheck = async () => {
-    setIsProcessing(true)
-    toast.info("Running integrity validation...")
-    
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    setShowAdvisor(true)
-    setShowSummary(true)
-    setIsProcessing(false)
-    
-    if (advisorData.overall_status === "Incomplete") {
-      toast.error(`Completeness check found ${advisorData.integrity_check.issues_found} issues`)
-    } else {
-      toast.success("Extraction validation complete!")
-    }
+    setIsAnalyzing(false)
+    setShowResults(true)
+    toast.success("Completeness check completed!")
   }
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case "Critical": return "destructive"
-      case "High": return "destructive"
-      case "Medium": return "secondary"
-      case "Low": return "outline"
-      default: return "secondary"
+      case "high":
+        return "destructive"
+      case "medium":
+        return "default"
+      case "low":
+        return "secondary"
+      default:
+        return "secondary"
     }
   }
 
@@ -138,317 +90,296 @@ export default function IngestPage() {
         className="mx-auto max-w-6xl"
       >
         <div className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight mb-2">UFDR/XRY Report Upload</h1>
+          <h1 className="text-4xl font-bold tracking-tight mb-2">Ingest & Validate</h1>
           <p className="text-lg text-muted-foreground">
-            Upload mobile extraction reports and run integrity validation before analysis.
+            Upload UFDR/XRY/Oxygen reports and validate extraction completeness
           </p>
-          <Badge variant="outline" className="mt-2">
-            <Shield className="mr-1 h-3 w-3" />
-            Demo Only — Mock Data
-          </Badge>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-6">
-            {/* Dropzone */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Upload Extraction Reports</CardTitle>
-                <CardDescription>
-                  Supports UFDR, XRY, and Oxygen Forensic formats
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  className={`
-                    relative border-2 border-dashed rounded-lg p-12 text-center transition-colors
-                    ${isDragging 
-                      ? "border-primary bg-primary/5" 
-                      : "border-muted-foreground/25 hover:border-primary/50"
-                    }
-                  `}
-                >
-                  <input
-                    type="file"
-                    multiple
-                    accept=".zip,.ufdr,.xry,.db,.xml"
-                    onChange={handleFileSelect}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    disabled={isProcessing}
-                  />
-                  <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-lg font-medium mb-1">
-                    {isDragging ? "Drop extraction reports here" : "Drag & drop UFDR/XRY files here"}
-                  </p>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    or click to select files from your computer
-                  </p>
-                  <Badge variant="secondary">UFDR, XRY, Oxygen, ZIP, DB</Badge>
-                </div>
+        {/* Upload Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5" />
+              Upload Extraction Report
+            </CardTitle>
+            <CardDescription>
+              <strong className="text-destructive">Demo Only:</strong> No actual file processing. 
+              Click "Run Completeness Check" to simulate analysis.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="border-2 border-dashed border-border rounded-lg p-12 text-center hover:border-primary transition-colors">
+              <input
+                type="file"
+                id="file-upload"
+                className="hidden"
+                accept=".zip,.ufdr,.xry,.xml"
+                onChange={handleFileUpload}
+              />
+              <label htmlFor="file-upload" className="cursor-pointer">
+                <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-lg font-medium mb-2">
+                  {uploadedFile || "Click to upload or drag and drop"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  UFDR, XRY, or Oxygen extraction files (.zip, .ufdr, .xry, .xml)
+                </p>
+              </label>
+            </div>
 
-                {files.length > 0 && (
-                  <div className="mt-6">
-                    <Button 
-                      onClick={runCompletenessCheck} 
-                      disabled={isProcessing || files.some(f => f.status === "processing")}
-                      className="w-full"
-                      size="lg"
-                    >
-                      {isProcessing ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Running Integrity Check...
-                        </>
-                      ) : (
-                        <>
-                          <Shield className="mr-2 h-4 w-4" />
-                          Run Completeness Check
-                        </>
-                      )}
-                    </Button>
-                  </div>
+            <div className="mt-6 flex gap-4">
+              <Button 
+                size="lg"
+                onClick={handleRunCheck}
+                disabled={!uploadedFile || isAnalyzing}
+                className="flex-1"
+              >
+                {isAnalyzing ? (
+                  <>
+                    <Sparkles className="mr-2 h-4 w-4 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Shield className="mr-2 h-4 w-4" />
+                    Run Completeness Check
+                  </>
                 )}
-              </CardContent>
-            </Card>
+              </Button>
+            </div>
 
-            {/* Uploaded Files */}
-            {files.length > 0 && (
-              <Card>
+            {isAnalyzing && (
+              <div className="mt-6">
+                <div className="flex items-center justify-between text-sm mb-2">
+                  <span className="text-muted-foreground">Validating extraction integrity...</span>
+                  <span className="font-medium">{analysisProgress}%</span>
+                </div>
+                <Progress value={analysisProgress} />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Results */}
+        {showResults && (
+          <>
+            {/* Extraction Status */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Card className="mb-8">
                 <CardHeader>
-                  <CardTitle>Uploaded Files</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="h-5 w-5" />
+                    Extraction Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Alert variant={advisorData.extraction_status.complete ? "default" : "destructive"} className="mb-6">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>
+                      {advisorData.extraction_status.complete 
+                        ? "Extraction Complete" 
+                        : "Incomplete Extraction Detected"}
+                    </AlertTitle>
+                    <AlertDescription>
+                      Confidence Score: {(advisorData.extraction_status.confidence * 100).toFixed(0)}% • 
+                      {" "}{advisorData.extraction_status.device_count} devices analyzed • 
+                      {" "}{advisorData.extraction_summary.apps_extracted.length} apps extracted
+                    </AlertDescription>
+                  </Alert>
+
+                  <div className="grid md:grid-cols-4 gap-4">
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-3">
+                          <MessageSquare className="h-8 w-8 text-primary" />
+                          <div>
+                            <p className="text-2xl font-bold">{advisorData.extraction_summary.total_messages}</p>
+                            <p className="text-sm text-muted-foreground">Messages</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-3">
+                          <Phone className="h-8 w-8 text-primary" />
+                          <div>
+                            <p className="text-2xl font-bold">{advisorData.extraction_summary.total_calls}</p>
+                            <p className="text-sm text-muted-foreground">Calls</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-3">
+                          <ImageIcon className="h-8 w-8 text-primary" />
+                          <div>
+                            <p className="text-2xl font-bold">{advisorData.extraction_summary.total_media}</p>
+                            <p className="text-sm text-muted-foreground">Media Files</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-3">
+                          <Users className="h-8 w-8 text-primary" />
+                          <div>
+                            <p className="text-2xl font-bold">{advisorData.extraction_summary.total_contacts}</p>
+                            <p className="text-sm text-muted-foreground">Contacts</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Missing Artifacts Advisor */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Card className="mb-8">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-destructive" />
+                    Missing Evidence Advisor
+                  </CardTitle>
                   <CardDescription>
-                    {files.filter(f => f.status === "completed").length} of {files.length} files ready
+                    Critical gaps detected in extraction — re-extraction recommended
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {files.map((file, index) => (
+                  {advisorData.missing_artifacts.map((artifact, index) => (
                     <motion.div
                       key={index}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="space-y-2"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          {file.status === "processing" && (
-                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                      <Alert variant={artifact.severity === "high" ? "destructive" : "default"}>
+                        <div className="flex items-start gap-4">
+                          {artifact.severity === "high" ? (
+                            <XCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                          ) : (
+                            <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                           )}
-                          {file.status === "completed" && (
-                            <CheckCircle2 className="h-5 w-5 text-green-500" />
-                          )}
-                          {file.status === "error" && (
-                            <AlertCircle className="h-5 w-5 text-destructive" />
-                          )}
-                          <div>
-                            <p className="font-medium">{file.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {(file.size / (1024 * 1024)).toFixed(2)} MB
-                            </p>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-2">
+                              <AlertTitle className="mb-0">{artifact.type}</AlertTitle>
+                              <Badge variant={getSeverityColor(artifact.severity)}>
+                                {artifact.severity.toUpperCase()}
+                              </Badge>
+                            </div>
+                            <AlertDescription className="mb-2">
+                              <strong>Issue:</strong> {artifact.reason}
+                            </AlertDescription>
+                            <AlertDescription className="text-xs">
+                              <strong>Recommendation:</strong> {artifact.recommendation}
+                            </AlertDescription>
                           </div>
                         </div>
-                        <Badge variant={
-                          file.status === "completed" ? "default" : 
-                          file.status === "error" ? "destructive" : 
-                          "secondary"
-                        }>
-                          {file.status}
-                        </Badge>
-                      </div>
-                      {file.status === "processing" && (
-                        <Progress value={file.progress} className="h-2" />
-                      )}
+                      </Alert>
                     </motion.div>
                   ))}
                 </CardContent>
               </Card>
-            )}
+            </motion.div>
 
-            {/* Extraction Summary */}
-            {showSummary && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Extraction Summary</CardTitle>
-                    <CardDescription>
-                      Parsed data from {advisorData.extracted_summary.devices_analyzed} devices
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                        <MessageSquare className="h-8 w-8 text-blue-500" />
-                        <div>
-                          <p className="text-2xl font-bold">{advisorData.extracted_summary.total_messages}</p>
-                          <p className="text-sm text-muted-foreground">Messages</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                        <Phone className="h-8 w-8 text-green-500" />
-                        <div>
-                          <p className="text-2xl font-bold">{advisorData.extracted_summary.total_calls}</p>
-                          <p className="text-sm text-muted-foreground">Calls</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                        <Users className="h-8 w-8 text-purple-500" />
-                        <div>
-                          <p className="text-2xl font-bold">{advisorData.extracted_summary.total_contacts}</p>
-                          <p className="text-sm text-muted-foreground">Contacts</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                        <ImageIcon className="h-8 w-8 text-pink-500" />
-                        <div>
-                          <p className="text-2xl font-bold">{advisorData.extracted_summary.total_media}</p>
-                          <p className="text-sm text-muted-foreground">Media Files</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                        <Smartphone className="h-8 w-8 text-orange-500" />
-                        <div>
-                          <p className="text-2xl font-bold">{advisorData.extracted_summary.total_apps}</p>
-                          <p className="text-sm text-muted-foreground">Apps</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                        <Shield className="h-8 w-8 text-red-500" />
-                        <div>
-                          <p className="text-2xl font-bold">{advisorData.completeness_score}%</p>
-                          <p className="text-sm text-muted-foreground">Complete</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-6">
-                      <Button asChild className="w-full" size="lg">
-                        <a href="/search">
-                          Proceed to Search
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </a>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-          </div>
-
-          {/* Advisor Panel */}
-          <div className="space-y-6">
-            {!showAdvisor ? (
-              <Card>
+            {/* Anomalies Detected */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card className="mb-8">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-primary" />
-                    Missing-Evidence Advisor
+                    <Sparkles className="h-5 w-5" />
+                    Suspicious Patterns Detected
                   </CardTitle>
                   <CardDescription>
-                    Upload reports and run integrity check to identify missing artifacts
+                    AI has identified {advisorData.anomalies.length} suspicious patterns requiring investigation
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-sm text-muted-foreground space-y-2">
-                    <p className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
-                      Validates UFDR manifest
-                    </p>
-                    <p className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
-                      Checks for missing logs
-                    </p>
-                    <p className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
-                      Detects incomplete exports
-                    </p>
-                    <p className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
-                      Identifies missing media
-                    </p>
+                <CardContent className="space-y-3">
+                  {advisorData.anomalies.map((anomaly, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start gap-3 p-3 rounded-lg bg-muted/50"
+                    >
+                      <AlertTriangle className={`h-5 w-5 flex-shrink-0 mt-0.5 ${
+                        anomaly.risk_level === "high" ? "text-destructive" : "text-orange-500"
+                      }`} />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="font-medium">{anomaly.type}</p>
+                          <Badge variant={anomaly.risk_level === "high" ? "destructive" : "default"}>
+                            {anomaly.risk_level}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{anomaly.description}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {typeof anomaly.timestamp === 'string' && anomaly.timestamp.includes('to') 
+                            ? anomaly.timestamp 
+                            : new Date(anomaly.timestamp).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Next Steps */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle>Next Steps</CardTitle>
+                  <CardDescription>
+                    Despite incomplete extraction, you can proceed with analysis
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex gap-4">
+                    <Button 
+                      size="lg"
+                      onClick={() => router.push("/search")}
+                      className="flex-1"
+                    >
+                      Proceed to Search
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                    <Button 
+                      size="lg"
+                      variant="outline"
+                      onClick={() => router.push("/network")}
+                      className="flex-1"
+                    >
+                      View Network Graph
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-              >
-                <Card className="border-destructive/50">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2 text-destructive">
-                        <AlertTriangle className="h-5 w-5" />
-                        Issues Found
-                      </CardTitle>
-                      <Badge variant="destructive">
-                        {advisorData.integrity_check.critical_issues} Critical
-                      </Badge>
-                    </div>
-                    <CardDescription>
-                      {advisorData.integrity_check.issues_found} artifacts missing or incomplete
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3 max-h-[600px] overflow-y-auto">
-                    {advisorData.missing_artifacts.map((artifact, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="p-3 rounded-lg border bg-card"
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <XCircle className="h-4 w-4 text-destructive flex-shrink-0 mt-0.5" />
-                            <div>
-                              <p className="font-medium text-sm">{artifact.category}</p>
-                              <Badge variant={getSeverityColor(artifact.severity) as any} className="mt-1">
-                                {artifact.severity}
-                              </Badge>
-                            </div>
-                          </div>
-                          <Badge variant="outline" className="text-xs">
-                            {artifact.app}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {artifact.description}
-                        </p>
-                        <p className="text-xs text-muted-foreground italic">
-                          💡 {artifact.recommendation}
-                        </p>
-                      </motion.div>
-                    ))}
-                  </CardContent>
-                </Card>
-
-                {/* Suspicious Patterns */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5 text-orange-500" />
-                      Suspicious Patterns
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {advisorData.suspicious_patterns_detected.map((pattern, index) => (
-                      <div key={index} className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
-                        <p className="font-medium text-sm mb-1">{pattern.type}</p>
-                        <p className="text-xs text-muted-foreground">{pattern.description}</p>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-          </div>
-        </div>
+            </motion.div>
+          </>
+        )}
       </motion.div>
     </div>
   )

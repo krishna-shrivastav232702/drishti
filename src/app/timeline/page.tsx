@@ -1,255 +1,299 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { motion } from "framer-motion"
-import { Chrono } from "react-chrono"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { Calendar, Clock, LayoutList, LayoutGrid } from "lucide-react"
+import { Clock, MessageSquare, Phone, Image as ImageIcon, AlertTriangle, Smartphone } from "lucide-react"
 import { toast } from "sonner"
-import { simulateLoading } from "@/lib/utils"
 import timelineData from "@/data/timeline.json"
 
-type TimelineMode = "VERTICAL" | "HORIZONTAL" | "VERTICAL_ALTERNATING"
-
-interface TimelineItem {
-  title: string
-  cardTitle: string
-  cardSubtitle: string
-  cardDetailedText: string
-  date: string
-}
-
 export default function TimelinePage() {
-  const [isLoading, setIsLoading] = useState(true)
-  const [mode, setMode] = useState<TimelineMode>("VERTICAL_ALTERNATING")
-  const [selectedItem, setSelectedItem] = useState<TimelineItem | null>(null)
+  const [selectedEvent, setSelectedEvent] = useState<any>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [filter, setFilter] = useState<string>("all")
 
-  useEffect(() => {
-    loadTimelineData()
-  }, [])
+  const filteredEvents = timelineData.filter((event: any) => {
+    if (filter === "all") return true
+    return event.type === filter
+  })
 
-  const loadTimelineData = async () => {
-    setIsLoading(true)
-    await simulateLoading(null, 1000)
-    setIsLoading(false)
-    toast.success("Timeline loaded successfully")
-  }
-
-  const handleItemClick = (item: any) => {
-    const fullItem = timelineData[item]
-    if (fullItem) {
-      setSelectedItem(fullItem)
-      setIsDrawerOpen(true)
+  const getEventIcon = (type: string) => {
+    switch (type) {
+      case "chat":
+        return MessageSquare
+      case "call":
+        return Phone
+      case "media":
+        return ImageIcon
+      default:
+        return Clock
     }
   }
 
-  const stats = [
-    { label: "Total Events", value: timelineData.length },
-    { label: "Date Range", value: "Jun - Nov 2023" },
-    { label: "Research Areas", value: "10+" },
-  ]
+  const getEventColor = (event: any) => {
+    if (event.deleted) return "border-destructive"
+    if (event.tags?.includes("Suspicious")) return "border-orange-500"
+    if (event.tags?.includes("Financial")) return "border-blue-500"
+    return "border-border"
+  }
+
+  const handleEventClick = (event: any) => {
+    setSelectedEvent(event)
+    setIsDrawerOpen(true)
+    toast.success(`Viewing event ${event.message_id}`)
+  }
 
   return (
     <div className="container py-10">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mx-auto max-w-7xl"
+        className="mx-auto max-w-6xl"
       >
         <div className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight mb-2">Research Timeline</h1>
+          <h1 className="text-4xl font-bold tracking-tight mb-2">Timeline Reconstruction</h1>
           <p className="text-lg text-muted-foreground">
-            Explore the chronological evolution of research and discoveries
+            Minute-by-minute chronology of chats, calls, media, and locations
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-4 mb-8">
-          {stats.map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card>
-                <CardContent className="pt-6">
-                  <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-                  <p className="text-2xl font-bold">{stat.value}</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground mb-3">View Mode</p>
-              <div className="flex gap-2">
-                <Button
-                  size="icon"
-                  variant={mode === "VERTICAL_ALTERNATING" ? "default" : "outline"}
-                  onClick={() => setMode("VERTICAL_ALTERNATING")}
-                  title="Alternating"
-                >
-                  <LayoutList className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant={mode === "VERTICAL" ? "default" : "outline"}
-                  onClick={() => setMode("VERTICAL")}
-                  title="Vertical"
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant={mode === "HORIZONTAL" ? "default" : "outline"}
-                  onClick={() => setMode("HORIZONTAL")}
-                  title="Horizontal"
-                >
-                  <Calendar className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Filters */}
+        <Card className="mb-8">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium mr-4">Filter by:</p>
+              <Button
+                size="sm"
+                variant={filter === "all" ? "default" : "outline"}
+                onClick={() => setFilter("all")}
+              >
+                All Events ({timelineData.length})
+              </Button>
+              <Button
+                size="sm"
+                variant={filter === "chat" ? "default" : "outline"}
+                onClick={() => setFilter("chat")}
+              >
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Chats
+              </Button>
+              <Button
+                size="sm"
+                variant={filter === "call" ? "default" : "outline"}
+                onClick={() => setFilter("call")}
+              >
+                <Phone className="mr-2 h-4 w-4" />
+                Calls
+              </Button>
+              <Button
+                size="sm"
+                variant={filter === "media" ? "default" : "outline"}
+                onClick={() => setFilter("media")}
+              >
+                <ImageIcon className="mr-2 h-4 w-4" />
+                Media
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
+        {/* Timeline */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-primary" />
-              Timeline Visualization
-            </CardTitle>
+            <CardTitle>Case Chronology</CardTitle>
             <CardDescription>
-              Click on any event to view more details
+              {filteredEvents.length} events • March 12-16, 2024 • Click any event for full details
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
-              <div className="flex items-center justify-center py-20">
-                <div className="text-center space-y-4">
-                  <Calendar className="h-12 w-12 animate-pulse text-primary mx-auto" />
-                  <p className="text-muted-foreground">Loading timeline...</p>
-                </div>
+            <div className="relative">
+              {/* Timeline Line */}
+              <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-border" />
+
+              {/* Events */}
+              <div className="space-y-6">
+                {filteredEvents.map((event: any, index: number) => {
+                  const Icon = getEventIcon(event.type)
+                  const eventDate = new Date(event.timestamp)
+                  
+                  return (
+                    <motion.div
+                      key={event.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="relative pl-16"
+                    >
+                      {/* Timeline Dot */}
+                      <div className="absolute left-6 top-2 w-5 h-5 rounded-full bg-background border-4 border-primary flex items-center justify-center">
+                        <Icon className="h-3 w-3 text-primary" />
+                      </div>
+
+                      {/* Event Card */}
+                      <Card
+                        className={`cursor-pointer hover:shadow-lg transition-all border-l-4 ${getEventColor(event)}`}
+                        onClick={() => handleEventClick(event)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="secondary" className="text-xs">
+                                {event.app}
+                              </Badge>
+                              {event.deleted && (
+                                <Badge variant="destructive" className="text-xs">
+                                  RECOVERED
+                                </Badge>
+                              )}
+                              {event.tags?.includes("Odd Hours") && (
+                                <Badge variant="outline" className="text-xs text-orange-500">
+                                  <AlertTriangle className="h-3 w-3 mr-1" />
+                                  Odd Hours
+                                </Badge>
+                              )}
+                            </div>
+                            <span className="text-xs text-muted-foreground font-mono">
+                              {event.message_id}
+                            </span>
+                          </div>
+
+                          <p className="text-sm font-medium mb-2">
+                            {event.description}
+                          </p>
+
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>
+                              {event.participants.join(" ↔ ")}
+                            </span>
+                            <span className="font-mono">
+                              {eventDate.toLocaleDateString()} {eventDate.toLocaleTimeString()}
+                            </span>
+                          </div>
+
+                          {event.tags && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {event.tags.map((tag: string) => (
+                                <Badge key={tag} variant="outline" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  )
+                })}
               </div>
-            ) : (
-              <div className="timeline-container">
-                <Chrono
-                  items={timelineData}
-                  mode={mode}
-                  theme={{
-                    primary: "hsl(var(--primary))",
-                    secondary: "hsl(var(--muted))",
-                    cardBgColor: "hsl(var(--card))",
-                    titleColor: "hsl(var(--foreground))",
-                    titleColorActive: "hsl(var(--primary))",
-                    cardTitleColor: "hsl(var(--card-foreground))",
-                  }}
-                  fontSizes={{
-                    cardSubtitle: "0.875rem",
-                    cardText: "0.875rem",
-                    cardTitle: "1rem",
-                    title: "0.875rem",
-                  }}
-                  cardHeight={150}
-                  scrollable={{ scrollbar: true }}
-                  enableOutline
-                  useReadMore={false}
-                  onItemSelected={handleItemClick}
-                  classNames={{
-                    card: "timeline-card",
-                    cardText: "text-muted-foreground",
-                    cardTitle: "font-semibold",
-                  }}
-                />
-              </div>
-            )}
+            </div>
           </CardContent>
         </Card>
       </motion.div>
 
       {/* Event Details Drawer */}
       <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <SheetContent className="sm:max-w-xl overflow-y-auto">
+        <SheetContent className="overflow-y-auto">
           <SheetHeader>
-            <SheetTitle className="text-2xl">{selectedItem?.cardTitle}</SheetTitle>
-            <SheetDescription className="text-base">
-              {selectedItem?.cardSubtitle}
+            <SheetTitle>Event Details</SheetTitle>
+            <SheetDescription>
+              Court-ready evidence citation with full metadata
             </SheetDescription>
           </SheetHeader>
-          {selectedItem && (
+
+          {selectedEvent && (
             <div className="mt-6 space-y-6">
               <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                <h3 className="font-semibold mb-3">Message Content</h3>
+                <div className="p-4 bg-muted rounded-lg">
+                  <p className="text-sm leading-relaxed">&quot;{selectedEvent.description}&quot;</p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-3">Evidence Citation</h3>
+                <div className="space-y-2 font-mono text-xs">
+                  <div className="flex items-center gap-2 p-2 bg-muted rounded">
+                    <span className="font-semibold text-primary">Message ID:</span>
+                    <code>{selectedEvent.message_id}</code>
+                  </div>
+                  <div className="flex items-center gap-2 p-2 bg-muted rounded">
+                    <span className="font-semibold">Timestamp:</span>
+                    <span>{new Date(selectedEvent.timestamp).toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center gap-2 p-2 bg-muted rounded">
+                    <span className="font-semibold">App:</span>
+                    <span>{selectedEvent.app}</span>
+                  </div>
+                  <div className="flex items-start gap-2 p-2 bg-muted rounded">
+                    <Smartphone className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                    <span>{selectedEvent.device}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-3">Participants</h3>
+                <div className="space-y-2">
+                  {selectedEvent.participants.map((participant: string, idx: number) => (
+                    <div key={idx} className="p-2 bg-muted rounded text-sm">
+                      {participant}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {selectedEvent.tags && (
+                <div>
+                  <h3 className="font-semibold mb-3">Tags</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedEvent.tags.map((tag: string) => (
+                      <Badge key={tag} variant="secondary">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedEvent.deleted && (
+                <div className="p-4 bg-destructive/10 border border-destructive rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertTriangle className="h-5 w-5 text-destructive" />
+                    <h3 className="font-semibold text-destructive">Deleted Message</h3>
+                  </div>
                   <p className="text-sm text-muted-foreground">
-                    {new Date(selectedItem.date).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
+                    This message was deleted by the sender but recovered during forensic extraction.
                   </p>
                 </div>
-                <Badge variant="secondary">{selectedItem.title}</Badge>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold mb-2">Details</h4>
-                <p className="text-muted-foreground leading-relaxed">
-                  {selectedItem.cardDetailedText}
-                </p>
-              </div>
+              )}
 
-              <div>
-                <h4 className="font-semibold mb-3">Impact Metrics</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center p-3 rounded-lg bg-muted/50">
-                    <span className="text-sm">Research Citations</span>
-                    <Badge>125+</Badge>
-                  </div>
-                  <div className="flex justify-between items-center p-3 rounded-lg bg-muted/50">
-                    <span className="text-sm">Media Coverage</span>
-                    <Badge>High</Badge>
-                  </div>
-                  <div className="flex justify-between items-center p-3 rounded-lg bg-muted/50">
-                    <span className="text-sm">Field Impact</span>
-                    <Badge variant="default">Significant</Badge>
+              {selectedEvent.media_ref && (
+                <div>
+                  <h3 className="font-semibold mb-3">Media Reference</h3>
+                  <div className="p-3 bg-muted rounded-lg">
+                    <p className="text-sm font-mono">{selectedEvent.media_ref}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Referenced media file (not extracted in current report)
+                    </p>
                   </div>
                 </div>
-              </div>
+              )}
 
-              <div className="pt-4 space-y-2">
-                <Button className="w-full">
-                  View Full Document
-                </Button>
-                <Button className="w-full" variant="outline">
+              <div className="pt-4">
+                <Button 
+                  className="w-full"
+                  onClick={() => toast.success(`Added ${selectedEvent.message_id} to report`)}
+                >
                   Add to Report
-                </Button>
-                <Button className="w-full" variant="outline">
-                  Related Research
                 </Button>
               </div>
             </div>
           )}
         </SheetContent>
       </Sheet>
-
-      <style jsx global>{`
-        .timeline-container {
-          min-height: 600px;
-        }
-        .timeline-card {
-          border: 1px solid hsl(var(--border));
-          border-radius: 0.625rem;
-          transition: all 0.2s;
-        }
-        .timeline-card:hover {
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-          border-color: hsl(var(--primary));
-        }
-      `}</style>
     </div>
   )
 }

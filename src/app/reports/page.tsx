@@ -6,281 +6,338 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Download, FileText, Trash2, Eye, BarChart3 } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { 
+  FileText, 
+  Download, 
+  Copy, 
+  Trash2, 
+  AlertCircle,
+  CheckCircle2,
+  Smartphone,
+  BarChart3
+} from "lucide-react"
 import { toast } from "sonner"
-import { formatDate, formatConfidence } from "@/lib/utils"
 import documentsData from "@/data/documents.json"
+import entitiesData from "@/data/entities.json"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 
-type Document = typeof documentsData[0]
-
 export default function ReportsPage() {
-  const [selectedItems, setSelectedItems] = useState<string[]>(
-    documentsData.slice(0, 5).map(doc => doc.id)
-  )
-  const [exportFormat, setExportFormat] = useState<string>("bibtex")
+  const [selectedItems, setSelectedItems] = useState<any[]>(documentsData.slice(0, 5))
 
-  const toggleItem = (id: string) => {
-    setSelectedItems(prev =>
-      prev.includes(id)
-        ? prev.filter(itemId => itemId !== id)
-        : [...prev, id]
-    )
+  const removeItem = (messageId: string) => {
+    setSelectedItems(prev => prev.filter(item => item.message_id !== messageId))
+    toast.success(`Removed ${messageId} from report`)
   }
 
-  const toggleAll = () => {
-    if (selectedItems.length === documentsData.length) {
+  const clearAll = () => {
+    if (confirm("Are you sure you want to clear all selected evidence?")) {
       setSelectedItems([])
-    } else {
-      setSelectedItems(documentsData.map(doc => doc.id))
+      toast.success("All items cleared from report")
     }
   }
 
-  const removeItem = (id: string) => {
-    setSelectedItems(prev => prev.filter(itemId => itemId !== id))
-    toast.success("Item removed from report")
+  const handleCopy = () => {
+    const reportText = generateReportText()
+    navigator.clipboard.writeText(reportText)
+    toast.success("Report copied to clipboard")
   }
 
-  const exportReport = () => {
-    const formats: Record<string, string> = {
-      bibtex: "BibTeX",
-      apa: "APA",
-      mla: "MLA",
-      chicago: "Chicago",
-      json: "JSON",
-      csv: "CSV"
-    }
-    toast.success(`Exporting ${selectedItems.length} items as ${formats[exportFormat]}`)
+  const handleDownload = () => {
+    toast.info("PDF download is a demo feature — no actual file generated")
+    setTimeout(() => {
+      toast.success("Report_Case_2024_03.pdf would be generated")
+    }, 1000)
   }
 
-  const selectedDocs = documentsData.filter(doc => selectedItems.includes(doc.id))
+  const generateReportText = () => {
+    let report = "=== FORENSIC INVESTIGATION REPORT ===\\n\\n"
+    report += "Executive Summary:\\n"
+    report += "Investigation reveals coordinated financial transactions and meeting arrangements between multiple suspects. "
+    report += `${selectedItems.length} pieces of evidence analyzed with full chain-of-custody documentation.\\n\\n`
+    report += "Key Findings:\\n"
+    report += `• ${selectedItems.filter(i => i.tags.includes("Financial")).length} financial transaction discussions\\n`
+    report += `• ${selectedItems.filter(i => i.deleted).length} recovered deleted messages\\n`
+    report += `• ${new Set(selectedItems.flatMap(i => i.participants)).size} unique individuals identified\\n\\n`
+    report += "Evidence Annexure:\\n"
+    selectedItems.forEach((item, idx) => {
+      report += `${idx + 1}. [${item.message_id}] ${new Date(item.timestamp).toLocaleString()} - "${item.text}"\\n`
+    })
+    return report
+  }
 
   // Chart data
-  const chartData = selectedDocs.map(doc => ({
-    name: doc.title.split(' ').slice(0, 2).join(' '),
-    citations: doc.citations,
-    confidence: Math.round(doc.confidence * 100)
-  }))
+  const messagesByApp = [
+    { app: "WhatsApp", count: selectedItems.filter(i => i.app === "WhatsApp").length },
+    { app: "Telegram", count: selectedItems.filter(i => i.app === "Telegram").length }
+  ].filter(d => d.count > 0)
 
-  const stats = [
-    { label: "Selected Items", value: selectedItems.length },
-    { label: "Total Citations", value: selectedDocs.reduce((sum, doc) => sum + doc.citations, 0) },
-    { label: "Avg. Confidence", value: `${Math.round(selectedDocs.reduce((sum, doc) => sum + doc.confidence, 0) / selectedDocs.length * 100)}%` },
-  ]
+  const messagesByTag = Array.from(
+    new Set(selectedItems.flatMap(i => i.tags))
+  ).map(tag => ({
+    tag,
+    count: selectedItems.filter(i => i.tags.includes(tag)).length
+  }))
 
   return (
     <div className="container py-10">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mx-auto max-w-7xl"
+        className="mx-auto max-w-6xl"
       >
         <div className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight mb-2">Reports & Citations</h1>
+          <h1 className="text-4xl font-bold tracking-tight mb-2">Court-Ready Report</h1>
           <p className="text-lg text-muted-foreground">
-            Manage your selected evidence and export citations in multiple formats
+            Evidence-backed, citation-verified investigation report
           </p>
         </div>
 
-        {/* Stats */}
-        <div className="grid gap-6 md:grid-cols-3 mb-8">
-          {stats.map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card>
-                <CardContent className="pt-6">
-                  <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-                  <p className="text-3xl font-bold">{stat.value}</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Charts */}
-        {selectedItems.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-primary" />
-                Citation Overview
-              </CardTitle>
-              <CardDescription>
-                Citation counts and confidence scores for selected items
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis 
-                    dataKey="name" 
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                  />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <Tooltip 
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--popover))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "0.625rem"
-                    }}
-                  />
-                  <Bar dataKey="citations" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Export Controls */}
-        <Card className="mb-8">
+        {/* Executive Summary */}
+        <Card className="mb-8 border-primary/50">
           <CardHeader>
-            <CardTitle>Export Report</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Executive Summary
+            </CardTitle>
             <CardDescription>
-              Choose your preferred citation format and download
+              AI-generated overview with verifiable citations
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Select value={exportFormat} onValueChange={setExportFormat}>
-                <SelectTrigger className="sm:w-[200px]">
-                  <SelectValue placeholder="Select format" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="bibtex">BibTeX</SelectItem>
-                  <SelectItem value="apa">APA Style</SelectItem>
-                  <SelectItem value="mla">MLA Style</SelectItem>
-                  <SelectItem value="chicago">Chicago Style</SelectItem>
-                  <SelectItem value="json">JSON</SelectItem>
-                  <SelectItem value="csv">CSV</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button 
-                onClick={exportReport}
-                disabled={selectedItems.length === 0}
-                className="sm:flex-1"
-              >
-                <Download className="mr-2 h-4 w-4" />
-                Export {selectedItems.length} {selectedItems.length === 1 ? 'Item' : 'Items'}
-              </Button>
+            <Alert className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Investigation Findings</AlertTitle>
+              <AlertDescription>
+                Analysis of {selectedItems.length} evidence items reveals coordinated financial transactions 
+                involving amounts up to ₹2 lac, with suspicious deletion patterns and odd-hour communications.
+              </AlertDescription>
+            </Alert>
+
+            <div className="space-y-3 text-sm">
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                <p>
+                  <strong>Financial Activity:</strong> {selectedItems.filter(i => i.tags.includes("Financial")).length} messages 
+                  discussing monetary transfers, UPI payments, and cash arrangements [msg:W1234, W1235, T5679]
+                </p>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                <p>
+                  <strong>Meeting Coordination:</strong> Multiple references to physical meetings at specific times 
+                  and locations [msg:W1236 - "Meeting kal raat 11pm, usual spot pe"]
+                </p>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                <p>
+                  <strong>Deleted Evidence:</strong> {selectedItems.filter(i => i.deleted).length} deleted message(s) 
+                  recovered containing suspicious content [msg:W1237_DELETED]
+                </p>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                <p>
+                  <strong>Network Analysis:</strong> {new Set(selectedItems.flatMap(i => i.participants)).size} individuals 
+                  identified with Rahul Sharma as central coordinator
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Selected Items Table */}
-        <Card>
+        {/* Analytics */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Messages by App
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={messagesByApp}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="app" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="hsl(var(--primary))" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Evidence by Category
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={messagesByTag}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="tag" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="hsl(var(--primary))" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Evidence Table */}
+        <Card className="mb-8">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Selected Items</CardTitle>
+                <CardTitle>Evidence Annexure</CardTitle>
                 <CardDescription>
-                  Manage items included in your report
+                  {selectedItems.length} items with full chain-of-custody documentation
                 </CardDescription>
               </div>
-              <Button variant="outline" size="sm" onClick={toggleAll}>
-                {selectedItems.length === documentsData.length ? 'Deselect All' : 'Select All'}
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handleCopy}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleDownload}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download PDF
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  onClick={clearAll}
+                  disabled={selectedItems.length === 0}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Clear All
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
             {selectedItems.length === 0 ? (
-              <div className="py-16 text-center">
-                <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No items selected</h3>
-                <p className="text-muted-foreground mb-4">
-                  Add items from the search page to create your report
-                </p>
-                <Button variant="outline" asChild>
-                  <a href="/search">Go to Search</a>
-                </Button>
+              <div className="py-16 text-center text-muted-foreground">
+                <FileText className="mx-auto h-12 w-12 mb-4 opacity-50" />
+                <p>No evidence items in report</p>
+                <p className="text-sm mt-2">Use "Add to Report" from Search or Timeline pages</p>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-12">
-                      <Checkbox
-                        checked={selectedItems.length === documentsData.length}
-                        onCheckedChange={toggleAll}
-                      />
-                    </TableHead>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Author</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-center">Confidence</TableHead>
-                    <TableHead className="text-center">Citations</TableHead>
+                    <TableHead>Message ID</TableHead>
+                    <TableHead>Content</TableHead>
+                    <TableHead>Participants</TableHead>
+                    <TableHead>Timestamp</TableHead>
+                    <TableHead>Device</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {selectedDocs.map((doc, index) => (
+                  {selectedItems.map((item, index) => (
                     <motion.tr
-                      key={doc.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
+                      key={item.message_id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
                       transition={{ delay: index * 0.05 }}
                     >
-                      <TableCell>
-                        <Checkbox
-                          checked={selectedItems.includes(doc.id)}
-                          onCheckedChange={() => toggleItem(doc.id)}
-                        />
-                      </TableCell>
-                      <TableCell className="max-w-md">
-                        <div className="space-y-1">
-                          <p className="font-medium">{doc.title}</p>
-                          <div className="flex flex-wrap gap-1">
-                            {doc.tags.slice(0, 2).map((tag) => (
-                              <Badge key={tag} variant="secondary" className="text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
+                      <TableCell className="font-mono text-xs">
+                        <div className="flex items-center gap-2">
+                          <code className="bg-muted px-2 py-0.5 rounded">
+                            {item.message_id}
+                          </code>
+                          {item.deleted && (
+                            <Badge variant="destructive" className="text-xs">
+                              RECOVERED
+                            </Badge>
+                          )}
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium text-sm">{doc.author}</p>
-                          <p className="text-xs text-muted-foreground">{doc.institution}</p>
+                      <TableCell className="max-w-xs">
+                        <p className="text-sm truncate">&quot;{item.text}&quot;</p>
+                        <div className="flex gap-1 mt-1">
+                          {item.tags.map((tag: string) => (
+                            <Badge key={tag} variant="outline" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm">
-                        {formatDate(doc.date)}
+                      <TableCell className="text-xs">
+                        {item.participants.join(", ")}
                       </TableCell>
-                      <TableCell className="text-center">
-                        <Badge variant={doc.confidence > 0.9 ? "default" : "secondary"}>
-                          {formatConfidence(doc.confidence)}
-                        </Badge>
+                      <TableCell className="text-xs font-mono">
+                        {new Date(item.timestamp).toLocaleString()}
                       </TableCell>
-                      <TableCell className="text-center font-medium">
-                        {doc.citations}
+                      <TableCell className="text-xs">
+                        <div className="flex items-center gap-1">
+                          <Smartphone className="h-3 w-3" />
+                          <span className="truncate max-w-[120px]">
+                            {item.device.split("(")[0]}
+                          </span>
+                        </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button variant="ghost" size="icon">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeItem(doc.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeItem(item.message_id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </TableCell>
                     </motion.tr>
                   ))}
                 </TableBody>
               </Table>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Key Entities */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Key Entities & Risk Assessment</CardTitle>
+            <CardDescription>
+              Individuals identified in evidence with risk scores
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 gap-4">
+              {entitiesData
+                .filter((e: any) => e.type === "person")
+                .sort((a: any, b: any) => b.risk_score - a.risk_score)
+                .map((entity: any) => (
+                  <div key={entity.id} className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold">{entity.name}</h3>
+                      <Badge variant={entity.risk_score > 0.85 ? "destructive" : "default"}>
+                        {entity.role}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {entity.reason}
+                    </p>
+                    <div className="flex items-center justify-between text-xs">
+                      <span>Risk Score:</span>
+                      <span className={`font-bold ${
+                        entity.risk_score > 0.85 ? "text-red-500" : 
+                        entity.risk_score > 0.70 ? "text-orange-500" : 
+                        "text-blue-500"
+                      }`}>
+                        {(entity.risk_score * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                  </div>
+                ))}
+            </div>
           </CardContent>
         </Card>
       </motion.div>

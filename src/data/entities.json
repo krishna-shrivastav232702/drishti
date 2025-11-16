@@ -1,115 +1,76 @@
 [
   {
     "id": "person_1",
-    "name": "Rahul Kumar",
-    "role": "Coordinator",
-    "phones": ["+91-9876543210", "+91-8765432109"],
+    "name": "Rahul Sharma",
+    "type": "person",
+    "phones": ["+91-98765-12345", "+91-87654-32109"],
     "devices": [
       {
-        "model": "iPhone 13",
-        "imei": "359876543210987",
-        "os": "iOS 17.2",
-        "extraction_method": "UFDR"
+        "model": "Samsung Galaxy S21",
+        "imei": "354217091234567",
+        "apps": ["WhatsApp", "Telegram", "Instagram"]
       }
     ],
-    "apps_used": ["WhatsApp", "Telegram", "Signal"],
-    "connection_count": 12,
-    "message_count": 156,
-    "call_count": 34,
-    "risk_score": 8.5,
-    "flags": ["High Activity", "Bridge Person", "Multi-Device"]
+    "role": "Coordinator",
+    "risk_score": 0.95,
+    "reason": "Central node connecting 3+ groups, high message burst activity, deleted messages detected"
   },
   {
     "id": "person_2",
-    "name": "Amit Singh",
-    "role": "Bridge",
-    "phones": ["+91-9123456789"],
+    "name": "Amit Kumar",
+    "type": "person",
+    "phones": ["+91-99887-76655"],
     "devices": [
       {
-        "model": "Samsung Galaxy S21 Ultra",
-        "imei": "352094102847563",
-        "os": "Android 14",
-        "extraction_method": "XRY"
+        "model": "iPhone 13",
+        "imei": "358240051234567",
+        "apps": ["WhatsApp", "Signal"]
       }
     ],
-    "apps_used": ["WhatsApp", "Telegram"],
-    "connection_count": 8,
-    "message_count": 142,
-    "call_count": 28,
-    "risk_score": 7.8,
-    "flags": ["Coordinator Pattern", "Late Night Activity"]
+    "role": "Bridge",
+    "risk_score": 0.78,
+    "reason": "Connects multiple isolated groups, financial transaction mentions"
   },
   {
     "id": "person_3",
-    "name": "Priya Sharma",
-    "role": "Active Participant",
-    "phones": ["+91-9988776655"],
+    "name": "Priya Singh",
+    "type": "person",
+    "phones": ["+91-88776-65544"],
     "devices": [
       {
-        "model": "OnePlus 9 Pro",
-        "imei": "861234567890123",
-        "os": "Android 13",
-        "extraction_method": "Oxygen"
+        "model": "OnePlus 9",
+        "imei": "861536051234567",
+        "apps": ["Telegram", "WhatsApp"]
       }
     ],
-    "apps_used": ["Telegram", "WhatsApp"],
-    "connection_count": 6,
-    "message_count": 89,
-    "call_count": 15,
-    "risk_score": 6.2,
-    "flags": ["Location Sharing", "Burst Activity"]
+    "role": "Participant",
+    "risk_score": 0.65,
+    "reason": "Regular communication with coordinator, exchange terminology used"
   },
   {
     "id": "person_4",
-    "name": "Vikram Patel",
-    "role": "Participant",
-    "phones": ["+91-9111222333"],
+    "name": "Vijay Gupta",
+    "type": "person",
+    "phones": ["+91-77665-54433"],
     "devices": [
       {
-        "model": "Xiaomi Mi 11",
-        "imei": "123456789012345",
-        "os": "Android 12",
-        "extraction_method": "UFDR"
+        "model": "Redmi Note 10",
+        "imei": "867104051234567",
+        "apps": ["WhatsApp"]
       }
     ],
-    "apps_used": ["WhatsApp"],
-    "connection_count": 4,
-    "message_count": 67,
-    "call_count": 12,
-    "risk_score": 5.5,
-    "flags": ["Planning Keywords"]
+    "role": "Participant",
+    "risk_score": 0.82,
+    "reason": "Deleted suspicious messages, odd-hour communications, meeting coordination"
   },
   {
     "id": "person_5",
-    "name": "Neha Verma",
-    "role": "Document Handler",
-    "phones": ["+91-9444555666"],
-    "devices": [
-      {
-        "model": "iPhone 12",
-        "imei": "987654321098765",
-        "os": "iOS 16.5",
-        "extraction_method": "UFDR"
-      }
-    ],
-    "apps_used": ["WhatsApp", "Telegram"],
-    "connection_count": 5,
-    "message_count": 54,
-    "call_count": 8,
-    "risk_score": 6.8,
-    "flags": ["Document Sharing", "Identity Documents"]
-  },
-  {
-    "id": "person_6",
     "name": "Unknown Contact",
-    "role": "Peripheral",
-    "phones": ["+91-9000111222"],
+    "type": "person",
+    "phones": ["+91-98765-43210"],
     "devices": [],
-    "apps_used": ["WhatsApp"],
-    "connection_count": 2,
-    "message_count": 12,
-    "call_count": 3,
-    "risk_score": 3.2,
-    "flags": ["Limited Data"]
+    "role": "Unknown",
+    "risk_score": 0.70,
+    "reason": "Unregistered contact, 'upar waala' reference suggests hierarchy"
   }
 ]
